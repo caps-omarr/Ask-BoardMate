@@ -113,7 +113,25 @@ def detect_intent(query: str) -> str:
         return "refusal"
     return "search"
 
-def retrieve_context(query: str, top_k: int = 2) -> str:
+def get_directory_overview() -> str:
+    """Provide a compact listing overview of all accredited boarding houses in the dataset."""
+    global CHUNKS_CACHE
+    if not CHUNKS_CACHE:
+        get_or_load_resources()
+    lines = []
+    for c in CHUNKS_CACHE:
+        meta = c.get("metadata", {})
+        name = meta.get("name", c.get("name", "Unknown"))
+        rent = meta.get("rent_price", "")
+        addr = meta.get("address", "")
+        avail_rooms = meta.get("available_rooms", 0)
+        avail_beds = meta.get("available_bedspaces", 0)
+        genders = meta.get("allowed_genders", "Any Gender (All)")
+        slug = meta.get("slug", "")
+        lines.append(f"- **{name}**: ₱{rent}/mo | Address: {addr} | Allowed: {genders} | Available: {avail_rooms} rooms, {avail_beds} bedspaces | Link: https://eboardmate.onrender.com/boarding-houses/{slug}")
+    return f"DIRECTORY OVERVIEW ({len(CHUNKS_CACHE)} total accredited boarding houses in Talibon, Bohol):\n" + "\n".join(lines)
+
+def retrieve_context(query: str, top_k: int = 5) -> str:
     global CHUNKS_CACHE, MODEL_CACHE, CHUNKS_EMBEDDINGS
     if not CHUNKS_CACHE:
         get_or_load_resources()
@@ -184,7 +202,9 @@ def chat_endpoint(payload: ChatRequest):
             prev_user_queries = [h.content for h in payload.history if h.role == "user"]
             if prev_user_queries:
                 search_query = f"{prev_user_queries[-1]} {query}"
-        retrieved_ctx = retrieve_context(search_query, top_k=payload.top_k or 2)
+        detailed_chunks = retrieve_context(search_query, top_k=payload.top_k or 5)
+        dir_overview = get_directory_overview()
+        retrieved_ctx = f"{dir_overview}\n\nDETAILED LISTING PROFILES:\n{detailed_chunks}"
 
     history_dicts = [{"role": h.role, "content": h.content} for h in (payload.history or [])]
     answer = call_gemini_conversational(
