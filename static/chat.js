@@ -29,57 +29,94 @@ if (themeToggleBtn) {
     });
 }
 
-// Simple Markdown Formatter
+// Markdown Formatter
 function formatMarkdown(text) {
     if (!text) return '';
     
+    // Normalize line breaks
+    let raw = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
     // Escape HTML tags to prevent XSS
-    let escaped = text
+    let escaped = raw
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
     // Bold: **text**
-    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-    // URLs to clickable links
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    escaped = escaped.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    // Markdown links: [title](url)
+    escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
-    // Convert newlines to breaks or bullet points
+    // Standalone URLs (not inside quotes/attributes)
+    escaped = escaped.replace(/(?<!href=")(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+
     const lines = escaped.split('\n');
     let html = '';
-    let inList = false;
+    let currentList = null; // 'ul' or 'ol'
 
-    for (let line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-            if (!inList) {
-                html += '<ul>';
-                inList = true;
-            }
-            html += `<li>${trimmed.substring(2)}</li>`;
-        } else if (/^\d+\.\s/.test(trimmed)) {
-            if (!inList) {
-                html += '<ol>';
-                inList = true;
-            }
-            html += `<li>${trimmed.replace(/^\d+\.\s/, '')}</li>`;
-        } else {
-            if (inList) {
-                html += '</ul>';
-                inList = false;
-            }
-            if (trimmed.length > 0) {
-                html += `<p>${trimmed}</p>`;
-            }
+    function closeList() {
+        if (currentList) {
+            html += `</${currentList}>`;
+            currentList = null;
         }
     }
 
-    if (inList) {
-        html += '</ul>';
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        let trimmed = line.trim();
+
+        if (!trimmed) {
+            closeList();
+            continue;
+        }
+
+        // Horizontal divider: --- or --------------------
+        if (/^[-*_]{3,}$/.test(trimmed)) {
+            closeList();
+            html += '<hr class="chat-divider">';
+            continue;
+        }
+
+        // Headings: ###, ##, #
+        const headingMatch = trimmed.match(/^(#{1,4})\s+(.+)$/);
+        if (headingMatch) {
+            closeList();
+            const level = headingMatch[1].length;
+            const tag = level <= 2 ? 'h3' : 'h4';
+            html += `<${tag} class="chat-heading">${headingMatch[2]}</${tag}>`;
+            continue;
+        }
+
+        // Unordered list item (- or *)
+        if (/^[-*]\s+/.test(trimmed)) {
+            if (currentList !== 'ul') {
+                closeList();
+                html += '<ul class="chat-list">';
+                currentList = 'ul';
+            }
+            html += `<li>${trimmed.replace(/^[-*]\s+/, '')}</li>`;
+            continue;
+        }
+
+        // Numbered list item (1. 2.)
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
+        if (numMatch) {
+            if (currentList !== 'ol') {
+                closeList();
+                html += '<ol class="chat-list">';
+                currentList = 'ol';
+            }
+            html += `<li>${numMatch[2]}</li>`;
+            continue;
+        }
+
+        // Regular paragraph text
+        closeList();
+        html += `<p class="chat-p">${trimmed}</p>`;
     }
 
+    closeList();
     return html;
 }
 

@@ -114,7 +114,7 @@ def call_gemini_api(prompt_text: str, intent: str = "search") -> str:
     
     if api_key and api_key != "your_gemini_api_key_here":
         # Supported Gemini models list with fallback
-        candidate_models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"]
+        candidate_models = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-latest"]
         for model_name in candidate_models:
             try:
                 from google import genai
@@ -126,6 +126,7 @@ def call_gemini_api(prompt_text: str, intent: str = "search") -> str:
                 if response and response.text:
                     return response.text
             except Exception as err:
+                logging.getLogger("main").warning(f"Model {model_name} failed: {err}")
                 continue
 
     # Grounded response formatting based explicitly on query intent

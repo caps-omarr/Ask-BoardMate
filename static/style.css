@@ -263,18 +263,44 @@ body {
     color: var(--primary-hover);
 }
 
-.bot-message .message-content p {
-    margin-bottom: 8px;
+.chat-heading {
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin: 10px 0 6px 0;
+    color: var(--primary);
+    line-height: 1.35;
 }
 
-.bot-message .message-content p:last-child {
+.chat-heading:first-child {
+    margin-top: 0;
+}
+
+.chat-divider {
+    border: 0;
+    border-top: 1px dashed var(--border-color);
+    margin: 10px 0;
+    opacity: 0.7;
+}
+
+.chat-list {
+    margin: 6px 0 8px 18px;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chat-list li {
+    line-height: 1.5;
+}
+
+.chat-p {
+    margin-bottom: 8px;
+    line-height: 1.55;
+}
+
+.chat-p:last-child {
     margin-bottom: 0;
-}
-
-.bot-message .message-content ul,
-.bot-message .message-content ol {
-    margin-left: 20px;
-    margin-bottom: 8px;
 }
 
 /* Typing Indicator */
