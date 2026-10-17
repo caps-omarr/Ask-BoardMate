@@ -20,6 +20,35 @@ if sys.stdout.encoding != 'utf-8':
 
 load_dotenv()
 
+# Conversational RAG System Prompt
+SYSTEM_PROMPT_CONVERSATIONAL = """You are E-BoardMate AI, the friendly and official student housing assistant for Talibon Polytechnic College (TPC) in Bohol, Philippines (https://eboardmate.onrender.com).
+
+GUIDELINES FOR CONVERSATIONAL RAG:
+1. GREETINGS & CASUAL INTERACTION:
+   - When the student greets you (e.g., "hi", "hello", "good morning", "hey", "how are you"), reply warmly and politely as E-BoardMate AI.
+   - Ask how you can help them find an accredited boarding house (e.g. asking about their target budget, gender preference, or desired room type).
+   - DO NOT list boarding houses unprompted when the student only says hi or greets you. Wait until they ask about housing.
+
+2. ANSWERING HOUSING INQUIRIES:
+   - When the student asks about boarding houses, locations, amenities, prices, or policies, answer based strictly on the RETRIEVED CONTEXT provided.
+   - Present details clearly with bullet points:
+     * Boarding House Name & Address
+     * Monthly Rent (₱) & Water/Electricity billing rules
+     * Allowed Genders & Vacancies
+     * Walking time & distance to TPC campus
+     * Direct link: https://eboardmate.onrender.com/boarding-houses/[slug]
+   - If a specific property detail is not in the context, explicitly say: "Information not specified in the accredited listing."
+
+3. CONVERSATIONAL CONTEXT & FOLLOW-UPS:
+   - Remember the conversation history. If the student asks follow-up questions (e.g., "how much was the rent for the first one?", "is water included?", "how do I contact the landlord?"), answer based on the property discussed previously.
+
+4. RESERVATIONS:
+   - When the student asks to book, reserve, or contact an owner, provide the owner's phone number and direct them to submit an online reservation at https://eboardmate.onrender.com.
+
+5. OUT-OF-SCOPE REFUSAL:
+   - If the student asks about homework, programming, general world facts, or topics outside TPC housing, decline politely: "I am specialized only in TPC student housing and boarding houses in Talibon, Bohol. How can I help you find a boarding house?"
+"""
+
 # System Prompts defined in Checkpoint 2
 SYSTEM_PROMPT_SEARCH = """You are E-BoardMate AI, the official student housing assistant for Talibon Polytechnic College (TPC) in Bohol.
 Your task is to answer student inquiries about boarding houses using ONLY the provided RETRIEVED CONTEXT below.
@@ -168,6 +197,63 @@ def call_gemini_api(prompt_text: str, intent: str = "search") -> str:
                 "   - **Rules & Curfew:** Curfew at 10:00 PM.\n"
                 "   - **Landlord Contact:** Landlord Office (+63 917 000 1122)\n"
                 "   - **Listing Link:** https://eboardmate.onrender.com/boarding-houses/gm-boarding-house")
+
+def call_gemini_conversational(query: str, retrieved_context: str = "", history: list = None, intent: str = "search") -> str:
+    """Conversational RAG generation supporting multi-turn dialogue without unprompted listing dumps."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key and api_key != "your_gemini_api_key_here":
+        candidate_models = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-latest"]
+        for model_name in candidate_models:
+            try:
+                from google import genai
+                client = genai.Client(api_key=api_key)
+
+                contents_payload = []
+                if history:
+                    for h in history[-8:]:
+                        role = "user" if h.get("role") == "user" else "model"
+                        contents_payload.append({"role": role, "parts": [{"text": h.get("content", "")}]})
+
+                if retrieved_context and intent not in ["greeting", "refusal"]:
+                    current_turn = f"RETRIEVED CONTEXT:\n{retrieved_context}\n\nSTUDENT INQUIRY:\n{query}"
+                else:
+                    current_turn = query
+
+                contents_payload.append({"role": "user", "parts": [{"text": current_turn}]})
+
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=contents_payload,
+                    config={"system_instruction": SYSTEM_PROMPT_CONVERSATIONAL}
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as err:
+                logging.getLogger("main").warning(f"Conversational model {model_name} failed: {err}")
+                continue
+
+    # Clean fallbacks
+    if intent == "greeting":
+        return ("Hello! I am E-BoardMate AI, your student housing assistant for Talibon Polytechnic College (TPC).\n\n"
+                "How can I help you with your boarding house search today? You can ask about available rooms, monthly rent, curfew hours, or female/male dorms near campus.")
+    elif intent == "refusal":
+        return ("I am E-BoardMate AI, specialized only in TPC student boarding house listings "
+                "and housing policies in Talibon, Bohol. How can I assist you with your boarding house search?")
+    elif intent == "reservation":
+        return ("--------------------------------------------------\n"
+                "🏠 BOARDING HOUSE: Torres Boarding House\n"
+                "📍 ADDRESS: Purok-4 San Isidro, Talibon, Bohol\n"
+                "💰 MONTHLY RENT: ₱700 | UTILITIES: Water & Electricity included\n"
+                "👤 LANDLORD: Landlord Office (+63 917 000 1122)\n"
+                "🔗 LIVE LISTING: https://eboardmate.onrender.com/boarding-houses/torres-boarding-house\n"
+                "--------------------------------------------------\n"
+                "To submit an online reservation, visit https://eboardmate.onrender.com/boarding-houses/torres-boarding-house.")
+    else:
+        return ("Here are accredited boarding houses near TPC:\n\n"
+                "1. **Torres Boarding House** (₱700/mo) - San Isidro, Talibon (Female only)\n"
+                "2. **GM Boarding House** (₱1,000/mo) - San Isidro, Talibon (Any gender)\n\n"
+                "Visit https://eboardmate.onrender.com for complete photos and online reservation.")
+
 
 def main():
     print("="*75)

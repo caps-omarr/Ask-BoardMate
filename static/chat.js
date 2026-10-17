@@ -169,12 +169,14 @@ function removeTypingIndicator() {
     }
 }
 
+const conversationHistory = [];
+
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const query = messageInput.value.trim();
     if (!query) return;
 
-    // Append user query
+    // Append user query to UI
     appendMessage(query, true);
     messageInput.value = '';
     messageInput.disabled = true;
@@ -188,7 +190,10 @@ chatForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ query: query })
+            body: JSON.stringify({
+                query: query,
+                history: conversationHistory.slice(-10) // keep last 10 turns
+            })
         });
 
         removeTypingIndicator();
@@ -198,7 +203,13 @@ chatForm.addEventListener('submit', async (e) => {
         }
 
         const data = await response.json();
-        appendMessage(data.answer || "I could not find an answer for that inquiry.");
+        const replyText = data.answer || "I could not find an answer for that inquiry.";
+        
+        // Record in conversation history for multi-turn context
+        conversationHistory.push({ role: 'user', content: query });
+        conversationHistory.push({ role: 'assistant', content: replyText });
+        
+        appendMessage(replyText);
 
     } catch (err) {
         removeTypingIndicator();

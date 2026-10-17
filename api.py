@@ -20,8 +20,10 @@ from main import (
     SYSTEM_PROMPT_SEARCH,
     SYSTEM_PROMPT_REFUSAL,
     SYSTEM_PROMPT_RESERVATION,
+    SYSTEM_PROMPT_CONVERSATIONAL,
     load_processed_chunks,
-    call_gemini_api
+    call_gemini_api,
+    call_gemini_conversational
 )
 
 # Configure logging
@@ -74,8 +76,13 @@ def get_or_load_resources():
 def startup_event():
     get_or_load_resources()
 
+class ChatMessage(BaseModel):
+    role: str  # "user" or "assistant"
+    content: str
+
 class ChatRequest(BaseModel):
     query: str
+    history: Optional[list[ChatMessage]] = []
     top_k: Optional[int] = 2
 
 class ChatResponse(BaseModel):
@@ -84,9 +91,23 @@ class ChatResponse(BaseModel):
     answer: str
     retrieved_context: str
 
+GREETING_WORDS = {
+    "hi", "hello", "hey", "good morning", "good afternoon", 
+    "good evening", "good day", "hi there", "hello po", 
+    "hi po", "sup", "yo", "kumusta", "who are you", "what can you do"
+}
+
 def detect_intent(query: str) -> str:
-    lowered = query.lower()
-    if any(w in lowered for w in ["reserve", "contact", "phone", "owner", "landlord", "book"]):
+    lowered = query.lower().strip()
+    words = set(lowered.split())
+    
+    # Check if this is purely a greeting / chit-chat
+    housing_keywords = ["house", "dorm", "room", "rent", "price", "curfew", "san isidro", "torres", "gm", "bedspace", "female", "male", "budget", "near"]
+    has_housing_intent = any(k in lowered for k in housing_keywords)
+    
+    if (lowered in GREETING_WORDS or (len(words) <= 2 and words.intersection(GREETING_WORDS))) and not has_housing_intent:
+        return "greeting"
+    elif any(w in lowered for w in ["reserve", "contact", "phone", "owner", "landlord", "book"]):
         return "reservation"
     elif any(w in lowered for w in ["python", "script", "homework", "weather", "france", "news", "assignment", "math"]):
         return "refusal"
@@ -153,20 +174,25 @@ def chat_endpoint(payload: ChatRequest):
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
     intent = detect_intent(query)
-    if intent == "reservation":
-        prompt_tpl = SYSTEM_PROMPT_RESERVATION
-    elif intent == "refusal":
-        prompt_tpl = SYSTEM_PROMPT_REFUSAL
+    
+    # Only perform vector retrieval if the student is inquiring or reserving
+    if intent in ["greeting", "refusal"]:
+        retrieved_ctx = ""
     else:
-        prompt_tpl = SYSTEM_PROMPT_SEARCH
+        search_query = query
+        if len(query.split()) < 4 and payload.history:
+            prev_user_queries = [h.content for h in payload.history if h.role == "user"]
+            if prev_user_queries:
+                search_query = f"{prev_user_queries[-1]} {query}"
+        retrieved_ctx = retrieve_context(search_query, top_k=payload.top_k or 2)
 
-    retrieved_ctx = retrieve_context(query, top_k=payload.top_k or 2)
-    full_prompt = prompt_tpl.format(
+    history_dicts = [{"role": h.role, "content": h.content} for h in (payload.history or [])]
+    answer = call_gemini_conversational(
+        query=query,
         retrieved_context=retrieved_ctx,
-        user_query=query
+        history=history_dicts,
+        intent=intent
     )
-
-    answer = call_gemini_api(full_prompt, intent=intent)
 
     return ChatResponse(
         query=query,
