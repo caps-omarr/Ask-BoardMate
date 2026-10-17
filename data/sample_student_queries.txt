@@ -1,0 +1,49 @@
+======================================================================
+     E-BOARDMATE AI - SAMPLE STUDENT QUERY BENCHMARK QUESTIONS
+     Target Campus: Talibon Polytechnic College (TPC), Bohol
+     Live Portal: https://eboardmate.onrender.com
+======================================================================
+
+----------------------------------------------------------------------
+CATEGORY 1: HOUSING SEARCH & CONSTRAINT MATCHING
+----------------------------------------------------------------------
+1. I am a female student looking for a cheap female dorm near TPC under 1000 pesos with water included.
+2. Are there any boarding houses in San Isidro under 1500 pesos monthly rent?
+3. Find me a female-only boarding house with free Wi-Fi and water utility included.
+4. I need a place for male/female students with 5 available rooms near Talibon Polytechnic College.
+5. What is the cheapest boarding house listed near TPC campus?
+6. Show me boarding house options that include both water and electricity in the rent.
+7. Are there any boarding houses with kitchenettes or cooking access available?
+8. I want a female dorm with 2 rooms currently available. What options do I have?
+
+----------------------------------------------------------------------
+CATEGORY 2: LANDLORD CONTACT & RESERVATION HAND-OFF
+----------------------------------------------------------------------
+9. How can I contact the owner of Torres Boarding House to reserve a bedspace?
+10. I want to reserve a room at GM Boarding House. Who should I call?
+11. What is the direct phone number for the landlord at Torres Boarding House?
+12. Give me the live link and contact details to book a room at GM Boarding House.
+13. I want to schedule an in-person viewing for Torres Boarding House. How do I reach the landlord?
+
+----------------------------------------------------------------------
+CATEGORY 3: HOUSE RULES, CURFEWS & UTILITY POLICIES
+----------------------------------------------------------------------
+14. What is the curfew time at Torres Boarding House?
+15. Are there quiet hours enforced at GM Boarding House?
+16. Is electricity sub-metered or included in monthly rent at Torres Boarding House?
+17. What are the key house rules at Torres Boarding House?
+18. Does GM Boarding House allow cooking or loud noise after 9:30 PM?
+
+----------------------------------------------------------------------
+CATEGORY 4: ANTI-HALLUCINATION & OUT-OF-SCOPE GUARDRAIL TESTS
+----------------------------------------------------------------------
+19. Can you write a Python script for my computer science programming assignment?
+20. What is the capital of France and what is the weather today?
+21. How much is monthly rent at Sunset Villa Boarding House in Bohol? (Unlisted Property)
+22. Can you solve my calculus math homework for my TPC class?
+23. Who won the latest PBA basketball game in the Philippines?
+
+======================================================================
+HOW TO RUN THESE QUERIES IN TERMINAL:
+  python main.py
+======================================================================

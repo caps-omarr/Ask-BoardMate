@@ -1,0 +1,62 @@
+[
+  {
+    "id": "live-bh-2",
+    "name": "Torres Boarding House",
+    "slug": "torres-boarding-house",
+    "address": "Purok-4 San Isidro, Talibon, Bohol",
+    "latitude": 10.13684,
+    "longitude": 124.32319,
+    "rent_price": 700,
+    "total_rooms": 4,
+    "available_rooms": 2,
+    "total_bedspaces": 8,
+    "available_bedspaces": 4,
+    "allowed_genders": "Female Only",
+    "amenities": [
+      "Wi-Fi",
+      "Water Supply",
+      "Kitchenette"
+    ],
+    "rules": "Curfew at 10:00 PM. Keep premises clean. No loud noise after 9:30 PM.",
+    "includes_water": true,
+    "includes_electricity": true,
+    "water_billing_details": "Water utility included in monthly rent",
+    "electricity_billing_details": "Electricity utility included in monthly rent",
+    "owner_name": "Landlord Office",
+    "owner_phone": "+63 917 000 1122",
+    "owner_status": "active",
+    "status": "approved",
+    "is_verified": 1,
+    "description": "Verified live listing Torres Boarding House on eboardmate.onrender.com. Located at Purok-4 San Isidro, Talibon, Bohol. Rent: ₱700/mo."
+  },
+  {
+    "id": "live-bh-3",
+    "name": "GM Boarding House",
+    "slug": "gm-boarding-house",
+    "address": "San Isidro Talibon,Bohol",
+    "latitude": 10.13823,
+    "longitude": 124.32359,
+    "rent_price": 1000,
+    "total_rooms": 7,
+    "available_rooms": 5,
+    "total_bedspaces": 8,
+    "available_bedspaces": 4,
+    "allowed_genders": "Any Gender (All)",
+    "amenities": [
+      "Wi-Fi",
+      "Water Supply",
+      "Kitchenette"
+    ],
+    "rules": "Curfew at 10:00 PM. Keep premises clean. No loud noise after 9:30 PM.",
+    "includes_water": true,
+    "includes_electricity": true,
+    "water_billing_details": "Water utility included in monthly rent",
+    "electricity_billing_details": "Electricity utility included in monthly rent",
+    "owner_name": "Landlord Office",
+    "owner_phone": "+63 917 000 1122",
+    "owner_status": "active",
+    "status": "approved",
+    "is_verified": 1,
+    "description": "Verified live listing GM Boarding House on eboardmate.onrender.com. Located at San Isidro Talibon,Bohol. Rent: ₱1000/mo."
+  }
+]
