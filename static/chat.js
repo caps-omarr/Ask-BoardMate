@@ -2,6 +2,32 @@ const chatMessages = document.getElementById('chatMessages');
 const chatForm = document.getElementById('chatForm');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+// Theme Management (Light / Dark mode toggle)
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('ebm-theme', theme);
+}
+
+// Initial theme detection from localStorage or system preference
+const savedTheme = localStorage.getItem('ebm-theme');
+if (savedTheme) {
+    applyTheme(savedTheme);
+} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    applyTheme('dark');
+} else {
+    applyTheme('light');
+}
+
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    });
+}
 
 // Simple Markdown Formatter
 function formatMarkdown(text) {
