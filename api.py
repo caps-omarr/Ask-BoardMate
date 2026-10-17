@@ -5,6 +5,8 @@ import logging
 from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import numpy as np
 
@@ -111,8 +113,23 @@ def retrieve_context(query: str, top_k: int = 2) -> str:
     matched = [c["chunk_text"] for c in CHUNKS_CACHE if any(w.lower() in c["chunk_text"].lower() for w in query.split())]
     return "\n\n---\n\n".join(matched[:top_k]) if matched else (CHUNKS_CACHE[0]["chunk_text"] if CHUNKS_CACHE else "")
 
+# Mount static files directory if present
+static_dir = os.path.join(current_dir, "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 @app.get("/")
 def root():
+    index_path = os.path.join(current_dir, "static", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {
+        "service": "Ask-BoardMate AI RAG API",
+        "status": "online"
+    }
+
+@app.get("/api/status")
+def api_status():
     return {
         "service": "Ask-BoardMate AI RAG API",
         "campus": "Talibon Polytechnic College (TPC), Bohol",

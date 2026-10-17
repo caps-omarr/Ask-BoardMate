@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+    <title>Ask-BoardMate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="chat-app">
+        <!-- Minimal Header -->
+        <header class="chat-header">
+            <div class="brand">
+                <span class="brand-icon">🏠</span>
+                <div>
+                    <h1 class="brand-title">Ask-BoardMate</h1>
+                    <span class="status-indicator"><span class="dot"></span> Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Message List -->
+        <main class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    Hello! I'm your housing assistant for Talibon Polytechnic College (TPC). How can I help you find a boarding house today?
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Bar -->
+        <footer class="chat-input-bar">
+            <form id="chatForm" class="input-form">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Ask about boarding houses, rent, curfew..." 
+                    autocomplete="off"
+                    required
+                />
+                <button type="submit" id="sendBtn" aria-label="Send message">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <script src="/static/chat.js"></script>
+</body>
+</html>
