@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.env.*
+*.env
+scratch/
+docs/
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+chroma_db/
+.vscode/
+.idea/
