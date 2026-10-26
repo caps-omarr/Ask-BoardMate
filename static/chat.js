@@ -29,12 +29,177 @@ if (themeToggleBtn) {
     });
 }
 
-// Markdown Formatter
+function escapeAttr(text) {
+    if (!text) return '';
+    return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Carousel Generator
+function generateCarouselHtml(slides) {
+    if (!slides || slides.length === 0) return '';
+    const carouselId = 'carousel_' + Math.random().toString(36).substr(2, 9);
+
+    if (slides.length === 1) {
+        const s = slides[0];
+        return `
+            <div class="chat-photo-card" onclick="openPhotoModal('${s.url}', '${escapeAttr(s.alt)}')">
+                <img src="${s.url}" alt="${escapeAttr(s.alt)}" loading="lazy" class="photo-card-img" />
+                <div class="photo-card-badge">📷 1 Photo</div>
+            </div>
+        `;
+    }
+
+    const slidesHtml = slides.map((s, idx) => `
+        <div class="carousel-slide ${idx === 0 ? 'active' : ''}">
+            <img src="${s.url}" alt="${escapeAttr(s.alt)}" loading="lazy" class="carousel-img" onclick="openPhotoModal('${s.url}', '${escapeAttr(s.alt)}')" />
+        </div>
+    `).join('');
+
+    const dotsHtml = slides.map((_, idx) => `
+        <span class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="goToCarouselSlide('${carouselId}', ${idx})"></span>
+    `).join('');
+
+    return `
+        <div class="chat-carousel" id="${carouselId}" data-index="0" data-total="${slides.length}">
+            <div class="carousel-track">
+                ${slidesHtml}
+            </div>
+            <button type="button" class="carousel-prev" aria-label="Previous photo" onclick="moveCarousel('${carouselId}', -1)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="carousel-next" aria-label="Next photo" onclick="moveCarousel('${carouselId}', 1)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <div class="carousel-counter">
+                📷 <span class="carousel-current">1</span> / <span>${slides.length}</span>
+            </div>
+            <div class="carousel-dots">
+                ${dotsHtml}
+            </div>
+        </div>
+    `;
+}
+
+// Global Carousel Navigation
+window.moveCarousel = function(carouselId, delta) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    const total = parseInt(carousel.getAttribute('data-total') || '1', 10);
+    let index = parseInt(carousel.getAttribute('data-index') || '0', 10);
+
+    index = (index + delta + total) % total;
+    carousel.setAttribute('data-index', index);
+
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === index);
+    });
+
+    const dots = carousel.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === index);
+    });
+
+    const counter = carousel.querySelector('.carousel-current');
+    if (counter) counter.textContent = (index + 1);
+};
+
+window.goToCarouselSlide = function(carouselId, targetIndex) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    const total = parseInt(carousel.getAttribute('data-total') || '1', 10);
+    if (targetIndex < 0 || targetIndex >= total) return;
+
+    carousel.setAttribute('data-index', targetIndex);
+
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === targetIndex);
+    });
+
+    const dots = carousel.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === targetIndex);
+    });
+
+    const counter = carousel.querySelector('.carousel-current');
+    if (counter) counter.textContent = (targetIndex + 1);
+};
+
+// Lightbox Modal
+window.openPhotoModal = function(url, alt) {
+    let modal = document.getElementById('photoLightbox');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'photoLightbox';
+        modal.className = 'photo-lightbox';
+        modal.innerHTML = `
+            <div class="lightbox-backdrop" onclick="closePhotoModal()"></div>
+            <div class="lightbox-content">
+                <button type="button" class="lightbox-close" onclick="closePhotoModal()" aria-label="Close photo preview">&times;</button>
+                <img id="lightboxImg" src="" alt="" />
+                <div id="lightboxCaption" class="lightbox-caption"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    const img = modal.querySelector('#lightboxImg');
+    const cap = modal.querySelector('#lightboxCaption');
+    img.src = url;
+    img.alt = alt || 'Boarding house photo';
+    cap.textContent = alt || '';
+    modal.classList.add('open');
+};
+
+window.closePhotoModal = function() {
+    const modal = document.getElementById('photoLightbox');
+    if (modal) modal.classList.remove('open');
+};
+
+// Markdown Formatter with Carousel Support
 function formatMarkdown(text) {
     if (!text) return '';
-    
+
     // Normalize line breaks
     let raw = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // Storage for carousel placeholders
+    const carousels = [];
+
+    // 1. Explicit :::carousel ... ::: blocks
+    raw = raw.replace(/:::carousel([\s\S]*?):::/gi, (match, inner) => {
+        const slides = [];
+        const imgRegex = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g;
+        let m;
+        while ((m = imgRegex.exec(inner)) !== null) {
+            slides.push({ alt: m[1] || 'Boarding House Photo', url: m[2] });
+        }
+        if (slides.length === 0) {
+            const urlRegex = /(https?:\/\/[^\s<)]+)/g;
+            while ((m = urlRegex.exec(inner)) !== null) {
+                slides.push({ alt: 'Boarding House Photo', url: m[1] });
+            }
+        }
+        if (slides.length === 0) return '';
+        const token = `__CAROUSEL_PLACEHOLDER_${carousels.length}__`;
+        carousels.push(generateCarouselHtml(slides));
+        return `\n${token}\n`;
+    });
+
+    // 2. Consecutive markdown images ![alt](url) -> group into carousel
+    const consecutiveImgRegex = /(?:!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)\s*)+/g;
+    raw = raw.replace(consecutiveImgRegex, (match) => {
+        const slides = [];
+        const singleRegex = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g;
+        let m;
+        while ((m = singleRegex.exec(match)) !== null) {
+            slides.push({ alt: m[1] || 'Boarding House Photo', url: m[2] });
+        }
+        if (slides.length === 0) return match;
+        const token = `__CAROUSEL_PLACEHOLDER_${carousels.length}__`;
+        carousels.push(generateCarouselHtml(slides));
+        return `\n${token}\n`;
+    });
 
     // Escape HTML tags to prevent XSS
     let escaped = raw
@@ -68,6 +233,15 @@ function formatMarkdown(text) {
 
         if (!trimmed) {
             closeList();
+            continue;
+        }
+
+        // Check for carousel placeholder
+        const carouselMatch = trimmed.match(/^__CAROUSEL_PLACEHOLDER_(\d+)__$/);
+        if (carouselMatch) {
+            closeList();
+            const idx = parseInt(carouselMatch[1], 10);
+            html += carousels[idx] || '';
             continue;
         }
 
@@ -117,6 +291,13 @@ function formatMarkdown(text) {
     }
 
     closeList();
+
+    // In case placeholders remained inside paragraphs, replace them globally
+    for (let i = 0; i < carousels.length; i++) {
+        const token = `__CAROUSEL_PLACEHOLDER_${i}__`;
+        html = html.replace(new RegExp(token, 'g'), carousels[i]);
+    }
+
     return html;
 }
 

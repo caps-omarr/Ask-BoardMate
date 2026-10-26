@@ -102,7 +102,11 @@ def detect_intent(query: str) -> str:
     words = set(lowered.split())
     
     # Check if this is purely a greeting / chit-chat
-    housing_keywords = ["house", "dorm", "room", "rent", "price", "curfew", "san isidro", "torres", "gm", "bedspace", "female", "male", "budget", "near"]
+    housing_keywords = [
+        "house", "dorm", "room", "rent", "price", "curfew", "san isidro", "torres", "gm", 
+        "bedspace", "female", "male", "budget", "near", "photo", "photos", "picture", 
+        "pictures", "pic", "pics", "image", "images", "look like", "view"
+    ]
     has_housing_intent = any(k in lowered for k in housing_keywords)
     
     if (lowered in GREETING_WORDS or (len(words) <= 2 and words.intersection(GREETING_WORDS))) and not has_housing_intent:

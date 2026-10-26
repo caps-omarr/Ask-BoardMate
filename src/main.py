@@ -51,6 +51,16 @@ GUIDELINES FOR CONVERSATIONAL RAG:
 
 6. OUT-OF-SCOPE REFUSAL:
    - If the student asks about homework, programming, general world facts, or topics outside TPC housing, decline politely: "I am specialized only in TPC student housing and boarding houses in Talibon, Bohol. How can I help you find a boarding house?"
+
+7. PHOTOS & SLIDESHOW:
+   - When the student asks to see photos/pictures of a boarding house (e.g., "show photos of Torres", "what does it look like?", "can I see pictures?"), or when providing comprehensive details about a specific boarding house that has photos in the RETRIEVED CONTEXT:
+     * Include the verified photo URLs using a carousel block:
+       :::carousel
+       ![[Name] Photo](photo_url_1)
+       ![[Name] Photo](photo_url_2)
+       :::
+     * ONLY use real URLs listed under "Available Listing Photos:" in the RETRIEVED CONTEXT. NEVER invent or hallucinate image URLs.
+     * If a listing has no photos available, state: "Photos for this boarding house have not been uploaded by the landlord yet."
 """
 
 # System Prompts defined in Checkpoint 2

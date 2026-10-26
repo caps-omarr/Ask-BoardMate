@@ -71,6 +71,9 @@ def format_listing_chunk(listing: Dict[str, Any], dist_km: float, walking_mins: 
     
     amenities_list = listing.get("amenities", [])
     amenities_str = ", ".join(amenities_list) if amenities_list else "Basic student accommodations"
+
+    photos_list = listing.get("photos", [])
+    photos_str = " ".join([f"![{listing['name']} Photo]({url})" for url in photos_list]) if photos_list else "None available"
     
     chunk = (
         f"BOARDING HOUSE LISTING: {listing['name']}\n"
@@ -86,6 +89,7 @@ def format_listing_chunk(listing: Dict[str, Any], dist_km: float, walking_mins: 
         f"House Rules & Curfew: {listing.get('rules', 'Standard quiet house rules apply.')}\n"
         f"Landlord Contact: {listing.get('owner_name', 'Landlord')} ({listing.get('owner_phone', 'N/A')})\n"
         f"Direct Listing Link: https://eboardmate.onrender.com/boarding-houses/{listing.get('slug', '')}\n"
+        f"Available Listing Photos:\n{photos_str}\n"
         f"Description: {clean_desc}"
     )
     return chunk
@@ -153,6 +157,7 @@ def process_raw_listings(raw_filepath: str, output_filepath: str) -> List[Dict[s
                 "includes_electricity": listing.get("includes_electricity", False),
                 "owner_name": listing.get("owner_name", ""),
                 "owner_phone": listing.get("owner_phone", ""),
+                "photos": listing.get("photos", []),
                 "is_verified": listing.get("is_verified", True)
             }
         }

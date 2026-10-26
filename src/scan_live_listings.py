@@ -79,6 +79,15 @@ def scan_all_live_listings():
             
         rules = merged.get("rules") or "Standard boarding house rules. Keep premises clean."
         description = merged.get("description") or f"Accredited boarding house in {merged.get('address')}."
+
+        # Extract all photo URLs (detail endpoint has complete gallery)
+        raw_photos = detail_data.get("photos") or item.get("photos") or []
+        photo_urls = []
+        for p in raw_photos:
+            if isinstance(p, dict) and p.get("url"):
+                photo_urls.append(p.get("url"))
+            elif isinstance(p, str) and p.startswith("http"):
+                photo_urls.append(p)
         
         clean_record = {
             "id": f"live-bh-{merged.get('id')}",
@@ -105,6 +114,7 @@ def scan_all_live_listings():
             "status": "approved",
             "is_verified": 1,
             "estimated_distance_km": merged.get("estimated_distance_km"),
+            "photos": photo_urls,
             "description": f"Verified accredited boarding house {name} on eboardmate.onrender.com. Located at {merged.get('address')}. Rent: ₱{merged.get('rent_price')}/mo. Rules: {rules}"
         }
         detailed_listings.append(clean_record)
