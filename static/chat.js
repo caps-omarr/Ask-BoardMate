@@ -3,12 +3,36 @@ const chatForm = document.getElementById('chatForm');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
+const themeLabel = document.getElementById('themeLabel');
+
+// Sidebar Drawer Elements (Mobile & Responsive)
+const sidebar = document.getElementById('sidebar');
+const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+function openSidebar() {
+    if (sidebar) sidebar.classList.add('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+}
+
+function closeSidebar() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+}
+
+if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', openSidebar);
+if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
+if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
 
 // Theme Management (Light / Dark mode toggle)
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-bs-theme', theme);
     localStorage.setItem('ebm-theme', theme);
+    if (themeLabel) {
+        themeLabel.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    }
 }
 
 // Initial theme detection from localStorage or system preference
@@ -436,7 +460,8 @@ function renderWelcomeHero() {
 
 // Global Suggestion Handler
 window.sendSuggestedPrompt = function(promptText) {
-    if (!messageInput) return;
+    if (!messageInput || !promptText) return;
+    closeSidebar();
     messageInput.value = promptText;
     chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 };
@@ -468,35 +493,44 @@ if (messageInput) {
 
 // "New Chat" / Reset Session Button
 const newChatBtn = document.getElementById('newChatBtn');
-if (newChatBtn) {
-    newChatBtn.addEventListener('click', async () => {
-        if (confirm("Start a new chat session? This will clear your current conversation history.")) {
-            if (isGenerating) {
-                stopGeneration();
-            }
+const mobileNewChatBtn = document.getElementById('mobileNewChatBtn');
 
-            try {
-                await fetch('/api/chat/reset', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: currentSessionId })
-                });
-            } catch (e) {}
-
-            currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-            localStorage.setItem('ebm_session_id', currentSessionId);
-
-            conversationHistory = [];
-            savedUiMessages = [];
-            localStorage.removeItem('ebm_conversation_history');
-            localStorage.removeItem('ebm_chat_ui_messages');
-
-            renderWelcomeHero();
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
-            messageInput.focus();
+async function handleResetSession() {
+    if (confirm("Start a new chat session? This will clear your current conversation history.")) {
+        closeSidebar();
+        if (isGenerating) {
+            stopGeneration();
         }
-    });
+
+        try {
+            await fetch('/api/chat/reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: currentSessionId })
+            });
+        } catch (e) {}
+
+        currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        localStorage.setItem('ebm_session_id', currentSessionId);
+
+        conversationHistory = [];
+        savedUiMessages = [];
+        localStorage.removeItem('ebm_conversation_history');
+        localStorage.removeItem('ebm_chat_ui_messages');
+
+        renderWelcomeHero();
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        messageInput.focus();
+    }
+}
+
+if (newChatBtn) {
+    newChatBtn.addEventListener('click', handleResetSession);
+}
+
+if (mobileNewChatBtn) {
+    mobileNewChatBtn.addEventListener('click', handleResetSession);
 }
 
 let currentAbortController = null;

@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
     <title>Ask-BoardMate — TPC Student Housing Assistant</title>
+    <link rel="icon" type="image/png" href="https://eboardmate.onrender.com/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Plus+Jakarta+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="chat-layout">
-        <!-- Claude-style Minimal Header -->
-        <header class="chat-header">
-            <div class="header-inner">
+    <div class="app-layout">
+        <!-- Sidebar Backdrop (for mobile drawer) -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
                 <div class="brand">
                     <span class="brand-avatar">🏠</span>
                     <div class="brand-info">
@@ -21,16 +25,88 @@
                         <span class="brand-subtitle">TPC Student Housing</span>
                     </div>
                 </div>
-                <!-- Header Actions -->
-                <div class="header-actions">
-                    <button id="newChatBtn" class="header-action-btn" aria-label="Start new chat" title="Start new conversation">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        <span class="action-label">New chat</span>
-                    </button>
-                    <button id="themeToggleBtn" class="header-action-btn theme-toggle-btn" aria-label="Toggle theme" title="Toggle dark/light mode">
+                <button id="sidebarCloseBtn" class="sidebar-icon-btn close-sidebar-btn" aria-label="Close sidebar" title="Close sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- New Chat Primary Action -->
+            <div class="sidebar-action-wrap">
+                <button id="newChatBtn" class="new-chat-btn" aria-label="Start new chat" title="Start new conversation">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>New chat</span>
+                </button>
+            </div>
+
+            <!-- Sidebar Navigation / Quick Topics -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Explore TPC Housing</div>
+                <ul class="nav-list">
+                    <li>
+                        <button class="nav-item active" id="currentChatNavItem">
+                            <span class="nav-icon">💬</span>
+                            <span class="nav-label">Current Chat</span>
+                            <span class="nav-active-dot"></span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item" onclick="window.sendSuggestedPrompt('What boarding houses are currently available near TPC?')">
+                            <span class="nav-icon">🔍</span>
+                            <span class="nav-label">Available Boarding Houses</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item" onclick="window.sendSuggestedPrompt('Show boarding houses with monthly rent under 1500 pesos')">
+                            <span class="nav-icon">💵</span>
+                            <span class="nav-label">Budget Under ₱1,500/mo</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item" onclick="window.sendSuggestedPrompt('Which boarding houses are for female students only?')">
+                            <span class="nav-icon">🚺</span>
+                            <span class="nav-label">Female-Only Dorms</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item" onclick="window.sendSuggestedPrompt('Which boarding houses have no curfew?')">
+                            <span class="nav-icon">🕒</span>
+                            <span class="nav-label">No Curfew Accommodations</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="nav-item" onclick="window.sendSuggestedPrompt('Show boarding houses with room photos')">
+                            <span class="nav-icon">📸</span>
+                            <span class="nav-label">Browse Room Photos</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="nav-section-label">Official Portal</div>
+                <ul class="nav-list">
+                    <li>
+                        <a href="https://eboardmate.onrender.com/" target="_blank" rel="noopener noreferrer" class="nav-item nav-link-external">
+                            <span class="nav-icon">🌐</span>
+                            <span class="nav-label">E-BoardMate Portal</span>
+                            <svg class="external-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Footer: Theme Toggle & Info -->
+            <div class="sidebar-footer">
+                <button id="themeToggleBtn" class="theme-toggle-row" aria-label="Toggle theme" title="Toggle dark/light mode">
+                    <div class="theme-toggle-left">
                         <svg id="themeIconSun" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="5"></circle>
                             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -45,43 +121,72 @@
                         <svg id="themeIconMoon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                         </svg>
-                    </button>
+                        <span id="themeLabel" class="theme-label">Dark mode</span>
+                    </div>
+                </button>
+                <div class="sidebar-status-tag">
+                    <span class="status-dot"></span>
+                    <span>Talibon, Bohol • 15 Accredited</span>
                 </div>
             </div>
-        </header>
+        </aside>
 
-        <!-- Conversational Stream (Centered Reading Column) -->
-        <main class="chat-stream-container">
-            <div class="chat-messages" id="chatMessages">
-                <!-- Dynamically populated by chat.js -->
-            </div>
-        </main>
-
-        <!-- Floating Input Island -->
-        <footer class="chat-input-bar">
-            <div class="input-container">
-                <form id="chatForm" class="input-form">
-                    <textarea 
-                        id="messageInput" 
-                        rows="1" 
-                        placeholder="Reply to Ask-BoardMate or ask about boarding houses..." 
-                        autocomplete="off"
-                    ></textarea>
-                    <button type="submit" id="sendBtn" aria-label="Send message" title="Send message">
-                        <svg id="sendIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="19" x2="12" y2="5"></line>
-                            <polyline points="5 12 12 5 19 12"></polyline>
-                        </svg>
-                        <svg id="stopIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                            <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-                        </svg>
-                    </button>
-                </form>
-                <div class="input-disclaimer">
-                    Grounded on 15 accredited TPC boarding houses in Talibon, Bohol. Always verify terms with landlords.
+        <!-- Main Content Area with eBoardMate Gradient Background -->
+        <div class="main-content">
+            <!-- Top Mobile / Minimal Bar -->
+            <header class="top-nav-bar">
+                <button id="sidebarToggleBtn" class="top-nav-btn" aria-label="Toggle sidebar" title="Toggle sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="top-nav-brand">
+                    <span class="top-brand-avatar">🏠</span>
+                    <span class="top-brand-title">Ask-BoardMate</span>
                 </div>
-            </div>
-        </footer>
+                <button id="mobileNewChatBtn" class="top-nav-btn mobile-only-btn" aria-label="New chat" title="Start new conversation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </header>
+
+            <!-- Conversational Stream (Centered Reading Column) -->
+            <main class="chat-stream-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Dynamically populated by chat.js -->
+                </div>
+            </main>
+
+            <!-- Floating Input Island -->
+            <footer class="chat-input-bar">
+                <div class="input-container">
+                    <form id="chatForm" class="input-form">
+                        <textarea 
+                            id="messageInput" 
+                            rows="1" 
+                            placeholder="Reply to Ask-BoardMate or ask about boarding houses..." 
+                            autocomplete="off"
+                        ></textarea>
+                        <button type="submit" id="sendBtn" aria-label="Send message" title="Send message">
+                            <svg id="sendIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="19" x2="12" y2="5"></line>
+                                <polyline points="5 12 12 5 19 12"></polyline>
+                            </svg>
+                            <svg id="stopIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                            </svg>
+                        </button>
+                    </form>
+                    <div class="input-disclaimer">
+                        Grounded on 15 accredited TPC boarding houses in Talibon, Bohol. Always verify terms with landlords.
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
 
     <script src="/static/chat.js"></script>
