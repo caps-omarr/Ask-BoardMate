@@ -3,78 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
-    <title>Ask-BoardMate</title>
+    <title>Ask-BoardMate — TPC Student Housing Assistant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Plus+Jakarta+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="chat-app">
-        <!-- Minimal Header -->
+    <div class="chat-layout">
+        <!-- Claude-style Minimal Header -->
         <header class="chat-header">
-            <div class="brand">
-                <span class="brand-icon">🏠</span>
-                <div>
-                    <h1 class="brand-title">Ask-BoardMate</h1>
-                    <span class="status-indicator"><span class="dot"></span> Online</span>
+            <div class="header-inner">
+                <div class="brand">
+                    <span class="brand-avatar">🏠</span>
+                    <div class="brand-info">
+                        <span class="brand-title">Ask-BoardMate</span>
+                        <span class="brand-subtitle">TPC Student Housing</span>
+                    </div>
                 </div>
-            </div>
-            <!-- Header Actions -->
-            <div class="header-actions">
-                <button id="newChatBtn" class="header-action-btn" aria-label="Start new chat" title="Start new chat / Reset conversation">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
-                <button id="themeToggleBtn" class="header-action-btn theme-toggle-btn" aria-label="Toggle theme" title="Toggle dark/light mode">
-                    <svg id="themeIconSun" class="theme-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <svg id="themeIconMoon" class="theme-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
+                <!-- Header Actions -->
+                <div class="header-actions">
+                    <button id="newChatBtn" class="header-action-btn" aria-label="Start new chat" title="Start new conversation">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span class="action-label">New chat</span>
+                    </button>
+                    <button id="themeToggleBtn" class="header-action-btn theme-toggle-btn" aria-label="Toggle theme" title="Toggle dark/light mode">
+                        <svg id="themeIconSun" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg id="themeIconMoon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Message List -->
-        <main class="chat-messages" id="chatMessages">
-            <div class="message bot-message">
-                <div class="message-content">
-                    Hello! I'm your housing assistant for Talibon Polytechnic College (TPC). How can I help you find a boarding house today?
-                </div>
+        <!-- Conversational Stream (Centered Reading Column) -->
+        <main class="chat-stream-container">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Dynamically populated by chat.js -->
             </div>
         </main>
 
-        <!-- Input Bar -->
+        <!-- Floating Input Island -->
         <footer class="chat-input-bar">
-            <form id="chatForm" class="input-form">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Ask about boarding houses, rent, curfew..." 
-                    autocomplete="off"
-                />
-                <button type="submit" id="sendBtn" aria-label="Send message" title="Send message">
-                    <svg id="sendIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                    <svg id="stopIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-                    </svg>
-                </button>
-            </form>
+            <div class="input-container">
+                <form id="chatForm" class="input-form">
+                    <textarea 
+                        id="messageInput" 
+                        rows="1" 
+                        placeholder="Reply to Ask-BoardMate or ask about boarding houses..." 
+                        autocomplete="off"
+                    ></textarea>
+                    <button type="submit" id="sendBtn" aria-label="Send message" title="Send message">
+                        <svg id="sendIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                            <polyline points="5 12 12 5 19 12"></polyline>
+                        </svg>
+                        <svg id="stopIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                        </svg>
+                    </button>
+                </form>
+                <div class="input-disclaimer">
+                    Grounded on 15 accredited TPC boarding houses in Talibon, Bohol. Always verify terms with landlords.
+                </div>
+            </div>
         </footer>
     </div>
 

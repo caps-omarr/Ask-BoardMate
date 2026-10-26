@@ -306,8 +306,22 @@ function scrollToBottom() {
 }
 
 function appendMessage(text, isUser = false, save = true) {
+    // Remove welcome hero once chat starts
+    const hero = document.getElementById('welcomeHero');
+    if (hero) hero.remove();
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+
+    if (!isUser) {
+        const authorHeader = document.createElement('div');
+        authorHeader.className = 'bot-author-header';
+        authorHeader.innerHTML = `
+            <span class="bot-avatar-badge">🏠</span>
+            <span class="bot-author-name">Ask-BoardMate</span>
+        `;
+        msgDiv.appendChild(authorHeader);
+    }
 
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
@@ -336,6 +350,14 @@ function showTypingIndicator() {
     indicatorDiv.className = 'message bot-message';
     indicatorDiv.id = 'typingIndicator';
 
+    const authorHeader = document.createElement('div');
+    authorHeader.className = 'bot-author-header';
+    authorHeader.innerHTML = `
+        <span class="bot-avatar-badge">🏠</span>
+        <span class="bot-author-name">Ask-BoardMate</span>
+    `;
+    indicatorDiv.appendChild(authorHeader);
+
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
     contentDiv.innerHTML = `
@@ -359,8 +381,6 @@ function removeTypingIndicator() {
 }
 
 // Session & Conversational Memory Management
-const DEFAULT_WELCOME_MSG = "Hello! I'm your housing assistant for Talibon Polytechnic College (TPC). How can I help you find a boarding house today?";
-
 let currentSessionId = localStorage.getItem('ebm_session_id');
 if (!currentSessionId) {
     currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
@@ -383,11 +403,66 @@ try {
     savedUiMessages = [];
 }
 
-// Restore saved messages to UI on page load/refresh
+// Render Claude-Style Welcome Hero with Suggestion Chips
+function renderWelcomeHero() {
+    chatMessages.innerHTML = `
+        <div class="welcome-hero" id="welcomeHero">
+            <div class="hero-glyph">🏠</div>
+            <div class="hero-pill">TPC Student Housing Assistant</div>
+            <h2 class="hero-title">How can I help you find housing today?</h2>
+            <p class="hero-subtitle">Ask about accredited boarding houses in Talibon, Bohol, compare rental rates, check curfews, or view property photos.</p>
+            
+            <div class="suggestion-grid">
+                <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('Show me photos of Torres Boarding House')">
+                    <span class="chip-icon">📷</span>
+                    <span>Photos of Torres Boarding House</span>
+                </button>
+                <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('What boarding houses are under ₱1,000 per month?')">
+                    <span class="chip-icon">💰</span>
+                    <span>Dorms under ₱1,000/month</span>
+                </button>
+                <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('Which boarding houses allow female students only?')">
+                    <span class="chip-icon">👩</span>
+                    <span>Female-only dorms near TPC</span>
+                </button>
+                <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('How many total boarding houses are in Talibon?')">
+                    <span class="chip-icon">📍</span>
+                    <span>Explore all 15 accredited houses</span>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Global Suggestion Handler
+window.sendSuggestedPrompt = function(promptText) {
+    if (!messageInput) return;
+    messageInput.value = promptText;
+    chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+};
+
+// Initial view: restore saved messages or display welcome hero
 if (savedUiMessages && savedUiMessages.length > 0) {
     chatMessages.innerHTML = '';
     savedUiMessages.forEach(m => {
         appendMessage(m.text, m.isUser, false);
+    });
+} else {
+    renderWelcomeHero();
+}
+
+// Textarea Auto-Resize & Keyboard Enter handling
+if (messageInput) {
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
     });
 }
 
@@ -416,8 +491,9 @@ if (newChatBtn) {
             localStorage.removeItem('ebm_conversation_history');
             localStorage.removeItem('ebm_chat_ui_messages');
 
-            chatMessages.innerHTML = '';
-            appendMessage(DEFAULT_WELCOME_MSG, false, true);
+            renderWelcomeHero();
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
             messageInput.focus();
         }
     });
@@ -472,6 +548,7 @@ chatForm.addEventListener('submit', async (e) => {
     // Append user query to UI and persist
     appendMessage(query, true, true);
     messageInput.value = '';
+    messageInput.style.height = 'auto';
 
     // Keep message input clickable and focused so user can type freely
     messageInput.focus();
@@ -529,5 +606,6 @@ chatForm.addEventListener('submit', async (e) => {
         messageInput.focus();
     }
 });
+
 
 
