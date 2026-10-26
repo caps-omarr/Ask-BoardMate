@@ -493,7 +493,6 @@ if (messageInput) {
 
 // "New Chat" / Reset Session Button
 const newChatBtn = document.getElementById('newChatBtn');
-const mobileNewChatBtn = document.getElementById('mobileNewChatBtn');
 
 async function handleResetSession() {
     if (confirm("Start a new chat session? This will clear your current conversation history.")) {
@@ -527,10 +526,6 @@ async function handleResetSession() {
 
 if (newChatBtn) {
     newChatBtn.addEventListener('click', handleResetSession);
-}
-
-if (mobileNewChatBtn) {
-    mobileNewChatBtn.addEventListener('click', handleResetSession);
 }
 
 let currentAbortController = null;
