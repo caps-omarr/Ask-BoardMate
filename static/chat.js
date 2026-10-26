@@ -170,19 +170,63 @@ function removeTypingIndicator() {
 }
 
 const conversationHistory = [];
+let currentAbortController = null;
+let isGenerating = false;
+
+function setGeneratingState(generating) {
+    isGenerating = generating;
+    if (generating) {
+        sendBtn.classList.add('stop-mode');
+        sendBtn.setAttribute('title', 'Stop response');
+        sendBtn.setAttribute('aria-label', 'Stop response');
+    } else {
+        sendBtn.classList.remove('stop-mode');
+        sendBtn.setAttribute('title', 'Send message');
+        sendBtn.setAttribute('aria-label', 'Send message');
+        currentAbortController = null;
+    }
+}
+
+function stopGeneration() {
+    if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+    }
+    removeTypingIndicator();
+    setGeneratingState(false);
+}
+
+// Clicking the button while generating stops the active response
+sendBtn.addEventListener('click', (e) => {
+    if (isGenerating) {
+        e.preventDefault();
+        e.stopPropagation();
+        stopGeneration();
+    }
+});
 
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const query = messageInput.value.trim();
     if (!query) return;
 
+    // If currently generating a previous response and user submits a new prompt,
+    // cancel the in-flight response and start the new one immediately
+    if (isGenerating) {
+        stopGeneration();
+    }
+
     // Append user query to UI
     appendMessage(query, true);
     messageInput.value = '';
-    messageInput.disabled = true;
-    sendBtn.disabled = true;
+
+    // Keep message input clickable and focused so user can type freely
+    messageInput.focus();
 
     showTypingIndicator();
+    setGeneratingState(true);
+
+    currentAbortController = new AbortController();
 
     try {
         const response = await fetch('/api/chat', {
@@ -190,6 +234,7 @@ chatForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
+            signal: currentAbortController.signal,
             body: JSON.stringify({
                 query: query,
                 history: conversationHistory.slice(-10) // keep last 10 turns
@@ -213,11 +258,15 @@ chatForm.addEventListener('submit', async (e) => {
 
     } catch (err) {
         removeTypingIndicator();
+        if (err.name === 'AbortError') {
+            console.log('Response generation stopped by user.');
+            return;
+        }
         appendMessage("Unable to connect to the housing server. Please check your connection and try again.");
         console.error(err);
     } finally {
-        messageInput.disabled = false;
-        sendBtn.disabled = false;
+        setGeneratingState(false);
         messageInput.focus();
     }
 });
+

@@ -380,6 +380,14 @@ body {
     flex-shrink: 0;
 }
 
+.input-form button #stopIcon {
+    display: none;
+}
+
+.input-form button #sendIcon {
+    display: block;
+}
+
 .input-form button:hover {
     background: var(--primary-hover);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
@@ -387,6 +395,24 @@ body {
 
 .input-form button:active {
     transform: scale(0.95);
+}
+
+/* Stop Mode Button */
+.input-form button.stop-mode {
+    background: #ef4444;
+}
+
+.input-form button.stop-mode:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.input-form button.stop-mode #sendIcon {
+    display: none;
+}
+
+.input-form button.stop-mode #stopIcon {
+    display: block;
 }
 
 .input-form button:disabled {

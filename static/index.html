@@ -56,12 +56,14 @@
                     id="messageInput" 
                     placeholder="Ask about boarding houses, rent, curfew..." 
                     autocomplete="off"
-                    required
                 />
-                <button type="submit" id="sendBtn" aria-label="Send message">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button type="submit" id="sendBtn" aria-label="Send message" title="Send message">
+                    <svg id="sendIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="22" y1="2" x2="11" y2="13"></line>
                         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <svg id="stopIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="5" y="5" width="14" height="14" rx="2"></rect>
                     </svg>
                 </button>
             </form>
