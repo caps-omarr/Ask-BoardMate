@@ -75,6 +75,26 @@ def get_or_load_resources():
 @app.on_event("startup")
 def startup_event():
     get_or_load_resources()
+import time
+import re
+import uuid
+
+# In-memory session store
+SESSION_STORE: dict[str, dict] = {}
+
+def get_or_create_session(session_id: Optional[str]) -> dict:
+    if not session_id:
+        session_id = f"sess_{uuid.uuid4().hex[:12]}"
+    if session_id not in SESSION_STORE:
+        SESSION_STORE[session_id] = {
+            "session_id": session_id,
+            "current_property": None,
+            "preferences": {},
+            "history": [],
+            "created_at": time.time(),
+            "updated_at": time.time()
+        }
+    return SESSION_STORE[session_id]
 
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
@@ -82,14 +102,49 @@ class ChatMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str
+    session_id: Optional[str] = None
     history: Optional[list[ChatMessage]] = []
-    top_k: Optional[int] = 2
+    top_k: Optional[int] = 5
 
 class ChatResponse(BaseModel):
     query: str
+    session_id: str
     intent: str
+    current_property: Optional[str] = None
     answer: str
     retrieved_context: str
+
+class ResetRequest(BaseModel):
+    session_id: str
+
+def extract_mentioned_property(text: str) -> Optional[str]:
+    """Identify if any accredited boarding house name or alias is mentioned in the text."""
+    global CHUNKS_CACHE
+    if not CHUNKS_CACHE:
+        get_or_load_resources()
+    lowered = text.lower()
+    for c in CHUNKS_CACHE:
+        name = c.get("name", "")
+        if name.lower() in lowered:
+            return name
+        alias = name.split()[0].lower()
+        if len(alias) >= 3 and alias in lowered:
+            return name
+    return None
+
+FOLLOWUP_KEYWORDS = [
+    "it", "its", "this", "that", "that one", "water", "electricity", "curfew", 
+    "rent", "price", "photo", "photos", "pic", "pics", "picture", "pictures", 
+    "owner", "landlord", "contact", "number", "phone", "reserve", "book", 
+    "rules", "how far", "distance", "walking", "available", "rooms", "bedspace"
+]
+
+def is_followup_query(query: str) -> bool:
+    lowered = query.lower().strip()
+    words = lowered.split()
+    if len(words) <= 5:
+        return any(k in lowered for k in FOLLOWUP_KEYWORDS)
+    return any(p in words for p in ["it", "its", "this", "that", "here", "there"])
 
 GREETING_WORDS = {
     "hi", "hello", "hey", "good morning", "good afternoon", 
@@ -105,7 +160,7 @@ def detect_intent(query: str) -> str:
     housing_keywords = [
         "house", "dorm", "room", "rent", "price", "curfew", "san isidro", "torres", "gm", 
         "bedspace", "female", "male", "budget", "near", "photo", "photos", "picture", 
-        "pictures", "pic", "pics", "image", "images", "look like", "view"
+        "pictures", "pic", "pics", "image", "images", "look like", "view", "available"
     ]
     has_housing_intent = any(k in lowered for k in housing_keywords)
     
@@ -181,6 +236,7 @@ def api_status():
         "endpoints": {
             "health": "/health",
             "chat": "/api/chat",
+            "reset": "/api/chat/reset",
             "docs": "/docs"
         }
     }
@@ -189,28 +245,73 @@ def api_status():
 def health():
     return {"status": "healthy", "service": "Ask-BoardMate AI"}
 
+@app.post("/api/chat/reset")
+def reset_session(payload: ResetRequest):
+    if payload.session_id in SESSION_STORE:
+        del SESSION_STORE[payload.session_id]
+        logger.info(f"Reset session {payload.session_id}")
+    return {"status": "ok", "message": "Session reset successfully", "session_id": payload.session_id}
+
 @app.post("/api/chat", response_model=ChatResponse)
 def chat_endpoint(payload: ChatRequest):
     query = payload.query.strip()
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
+    # 1. Retrieve or create session state
+    session = get_or_create_session(payload.session_id)
+    session_id = session["session_id"]
+    session["updated_at"] = time.time()
+
+    # 2. Extract mentioned property if specified in query
+    mentioned = extract_mentioned_property(query)
+    if mentioned:
+        session["current_property"] = mentioned
+
+    # 3. Coreference Resolution / Query Expansion for follow-ups
+    active_property = session.get("current_property")
+    search_query = query
+    if not mentioned and active_property and is_followup_query(query):
+        search_query = f"{active_property} {query}"
+
+    # 4. User preference detection
+    lowered = query.lower()
+    if "female" in lowered or "girl" in lowered or "lady" in lowered or "women" in lowered:
+        session["preferences"]["gender"] = "Female Only"
+    elif "male" in lowered or "boy" in lowered or "gentlemen" in lowered or "men" in lowered:
+        session["preferences"]["gender"] = "Male Only"
+
+    budget_match = re.search(r'(?:under|below|budget|max|limit|around)?\s*₱?\s*(\d{3,4})', lowered)
+    if budget_match:
+        try:
+            session["preferences"]["budget"] = int(budget_match.group(1))
+        except Exception:
+            pass
+
+    # 5. Intent detection
     intent = detect_intent(query)
     
-    # Only perform vector retrieval if the student is inquiring or reserving
+    # 6. Context retrieval with state enrichment
     if intent in ["greeting", "refusal"]:
         retrieved_ctx = ""
     else:
-        search_query = query
-        if len(query.split()) < 4 and payload.history:
-            prev_user_queries = [h.content for h in payload.history if h.role == "user"]
-            if prev_user_queries:
-                search_query = f"{prev_user_queries[-1]} {query}"
         detailed_chunks = retrieve_context(search_query, top_k=payload.top_k or 5)
         dir_overview = get_directory_overview()
-        retrieved_ctx = f"{dir_overview}\n\nDETAILED LISTING PROFILES:\n{detailed_chunks}"
+        
+        context_parts = [dir_overview]
+        if active_property:
+            context_parts.append(f"CURRENT CONVERSATION FOCUS: The student is asking about or following up on '{active_property}'.")
+        if session.get("preferences"):
+            pref_str = ", ".join([f"{k}: {v}" for k, v in session["preferences"].items()])
+            context_parts.append(f"STUDENT STATED PREFERENCES: {pref_str}")
+        context_parts.append(f"DETAILED LISTING PROFILES:\n{detailed_chunks}")
+        retrieved_ctx = "\n\n".join(context_parts)
 
+    # 7. Merge history from payload or session
     history_dicts = [{"role": h.role, "content": h.content} for h in (payload.history or [])]
+    if not history_dicts and session["history"]:
+        history_dicts = session["history"][-10:]
+
     answer = call_gemini_conversational(
         query=query,
         retrieved_context=retrieved_ctx,
@@ -218,9 +319,24 @@ def chat_endpoint(payload: ChatRequest):
         intent=intent
     )
 
+    # 8. Record property discussed in answer if not already set
+    if not session.get("current_property"):
+        ans_prop = extract_mentioned_property(answer)
+        if ans_prop:
+            session["current_property"] = ans_prop
+
+    # 9. Update server session history
+    session["history"].append({"role": "user", "content": query})
+    session["history"].append({"role": "assistant", "content": answer})
+    if len(session["history"]) > 20:
+        session["history"] = session["history"][-20:]
+
     return ChatResponse(
         query=query,
+        session_id=session_id,
         intent=intent,
+        current_property=session.get("current_property"),
         answer=answer,
         retrieved_context=retrieved_ctx
     )
+

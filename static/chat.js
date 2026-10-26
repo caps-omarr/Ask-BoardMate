@@ -305,7 +305,7 @@ function scrollToBottom() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function appendMessage(text, isUser = false) {
+function appendMessage(text, isUser = false, save = true) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
 
@@ -321,6 +321,14 @@ function appendMessage(text, isUser = false) {
     msgDiv.appendChild(contentDiv);
     chatMessages.appendChild(msgDiv);
     scrollToBottom();
+
+    if (save) {
+        savedUiMessages.push({ text, isUser });
+        if (savedUiMessages.length > 50) savedUiMessages = savedUiMessages.slice(-50);
+        try {
+            localStorage.setItem('ebm_chat_ui_messages', JSON.stringify(savedUiMessages));
+        } catch (e) {}
+    }
 }
 
 function showTypingIndicator() {
@@ -350,7 +358,71 @@ function removeTypingIndicator() {
     }
 }
 
-const conversationHistory = [];
+// Session & Conversational Memory Management
+const DEFAULT_WELCOME_MSG = "Hello! I'm your housing assistant for Talibon Polytechnic College (TPC). How can I help you find a boarding house today?";
+
+let currentSessionId = localStorage.getItem('ebm_session_id');
+if (!currentSessionId) {
+    currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('ebm_session_id', currentSessionId);
+}
+
+let conversationHistory = [];
+try {
+    const savedHist = localStorage.getItem('ebm_conversation_history');
+    if (savedHist) conversationHistory = JSON.parse(savedHist);
+} catch (e) {
+    conversationHistory = [];
+}
+
+let savedUiMessages = [];
+try {
+    const savedUi = localStorage.getItem('ebm_chat_ui_messages');
+    if (savedUi) savedUiMessages = JSON.parse(savedUi);
+} catch (e) {
+    savedUiMessages = [];
+}
+
+// Restore saved messages to UI on page load/refresh
+if (savedUiMessages && savedUiMessages.length > 0) {
+    chatMessages.innerHTML = '';
+    savedUiMessages.forEach(m => {
+        appendMessage(m.text, m.isUser, false);
+    });
+}
+
+// "New Chat" / Reset Session Button
+const newChatBtn = document.getElementById('newChatBtn');
+if (newChatBtn) {
+    newChatBtn.addEventListener('click', async () => {
+        if (confirm("Start a new chat session? This will clear your current conversation history.")) {
+            if (isGenerating) {
+                stopGeneration();
+            }
+
+            try {
+                await fetch('/api/chat/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: currentSessionId })
+                });
+            } catch (e) {}
+
+            currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('ebm_session_id', currentSessionId);
+
+            conversationHistory = [];
+            savedUiMessages = [];
+            localStorage.removeItem('ebm_conversation_history');
+            localStorage.removeItem('ebm_chat_ui_messages');
+
+            chatMessages.innerHTML = '';
+            appendMessage(DEFAULT_WELCOME_MSG, false, true);
+            messageInput.focus();
+        }
+    });
+}
+
 let currentAbortController = null;
 let isGenerating = false;
 
@@ -397,8 +469,8 @@ chatForm.addEventListener('submit', async (e) => {
         stopGeneration();
     }
 
-    // Append user query to UI
-    appendMessage(query, true);
+    // Append user query to UI and persist
+    appendMessage(query, true, true);
     messageInput.value = '';
 
     // Keep message input clickable and focused so user can type freely
@@ -417,6 +489,7 @@ chatForm.addEventListener('submit', async (e) => {
             },
             signal: currentAbortController.signal,
             body: JSON.stringify({
+                session_id: currentSessionId,
                 query: query,
                 history: conversationHistory.slice(-10) // keep last 10 turns
             })
@@ -434,8 +507,14 @@ chatForm.addEventListener('submit', async (e) => {
         // Record in conversation history for multi-turn context
         conversationHistory.push({ role: 'user', content: query });
         conversationHistory.push({ role: 'assistant', content: replyText });
+        if (conversationHistory.length > 20) {
+            conversationHistory = conversationHistory.slice(-20);
+        }
+        try {
+            localStorage.setItem('ebm_conversation_history', JSON.stringify(conversationHistory));
+        } catch (e) {}
         
-        appendMessage(replyText);
+        appendMessage(replyText, false, true);
 
     } catch (err) {
         removeTypingIndicator();
@@ -443,11 +522,12 @@ chatForm.addEventListener('submit', async (e) => {
             console.log('Response generation stopped by user.');
             return;
         }
-        appendMessage("Unable to connect to the housing server. Please check your connection and try again.");
+        appendMessage("Unable to connect to the housing server. Please check your connection and try again.", false, true);
         console.error(err);
     } finally {
         setGeneratingState(false);
         messageInput.focus();
     }
 });
+
 

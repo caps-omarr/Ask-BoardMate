@@ -43,8 +43,10 @@ GUIDELINES FOR CONVERSATIONAL RAG:
      * Direct link: https://eboardmate.onrender.com/boarding-houses/[slug]
    - If a specific property detail is not in the context, explicitly say: "Information not specified in the accredited listing."
 
-4. CONVERSATIONAL CONTEXT & FOLLOW-UPS:
-   - Remember the conversation history. If the student asks follow-up questions (e.g., "how much was the rent for the first one?", "is water included?", "how do I contact the landlord?"), answer based on the property discussed previously.
+4. CONVERSATIONAL MEMORY & MULTI-TURN FOLLOW-UPS:
+   - You have active session and state memory. When the student asks follow-up questions (e.g., "how much was the rent?", "is water included?", "what is its curfew?", "show its photos", "how do I contact the owner?"), automatically resolve pronouns ("it", "that", "this boarding house") to the active property currently being discussed.
+   - If the student asks if you retain memory across page refreshes, confirm that session memory is preserved across refreshes so they can continue their inquiry, and mention they can start a fresh chat anytime using the New Chat (+) button.
+   - Remember student preferences (budget constraints, gender requirements, or preferred locations) across turns and use them when suggesting alternative boarding houses.
 
 5. RESERVATIONS:
    - When the student asks to book, reserve, or contact an owner, provide the owner's phone number and direct them to submit an online reservation at https://eboardmate.onrender.com.
@@ -224,9 +226,23 @@ def call_gemini_conversational(query: str, retrieved_context: str = "", history:
 
                 contents_payload = []
                 if history:
-                    for h in history[-8:]:
+                    # Ensure strictly alternating user/model turns ending before current user turn
+                    clean_history = []
+                    expected_role = "user"
+                    for h in history[-10:]:
+                        text = (h.get("content") or "").strip()
+                        if not text:
+                            continue
                         role = "user" if h.get("role") == "user" else "model"
-                        contents_payload.append({"role": role, "parts": [{"text": h.get("content", "")}]})
+                        if role == expected_role:
+                            clean_history.append({"role": role, "parts": [{"text": text}]})
+                            expected_role = "model" if role == "user" else "user"
+                    
+                    # If clean_history ends on a user turn, pop it so current turn can be user
+                    if clean_history and clean_history[-1]["role"] == "user":
+                        clean_history.pop()
+
+                    contents_payload.extend(clean_history)
 
                 if retrieved_context and intent not in ["greeting", "refusal"]:
                     current_turn = f"RETRIEVED CONTEXT:\n{retrieved_context}\n\nSTUDENT INQUIRY:\n{query}"
