@@ -438,55 +438,55 @@ body {
     line-height: 1.45;
 }
 
-/* Sidebar Footer: Portal Button & Bottom Row */
-.sidebar-footer {
-    padding: 12px 14px;
-    border-top: 1px solid var(--border-subtle);
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    background: var(--bg-sidebar);
+/* Pinned Portal Link right above the footer divider (Red Area) */
+.sidebar-portal-wrap {
+    padding: 6px 10px 8px 10px;
+    flex-shrink: 0;
 }
 
-.sidebar-portal-btn {
+.sidebar-portal-link {
     width: 100%;
-    height: 38px;
-    padding: 0 12px;
-    border-radius: 9px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-surface);
-    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 8px;
     font-size: 0.83rem;
     font-weight: 500;
     font-family: inherit;
+    color: var(--text-secondary);
+    background: transparent;
     text-decoration: none;
-    cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-    transition: all 0.18s ease;
+    transition: all 0.15s ease;
 }
 
-.sidebar-portal-btn:hover {
+.sidebar-portal-link:hover {
     background: var(--bg-sidebar-hover);
     color: var(--text-main);
-    border-color: var(--border-hover);
-    transform: translateY(-0.5px);
 }
 
-.portal-btn-left {
+.portal-link-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
 }
 
-.portal-btn-left svg {
+.portal-link-left svg {
     color: var(--brand-primary);
+    flex-shrink: 0;
 }
 
-.sidebar-portal-btn .external-icon {
+.sidebar-portal-link .external-icon {
     opacity: 0.6;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Sidebar Footer (Bottom Row: Status Left, Icon-only Theme Toggle Right) */
+.sidebar-footer {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-sidebar);
     flex-shrink: 0;
 }
 
@@ -495,7 +495,6 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding-top: 2px;
 }
 
 .sidebar-status-tag {
