@@ -25,6 +25,29 @@ if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', openSidebar);
 if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeSidebar);
 if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
 
+// Desktop Sidebar Toggle (Smooth Collapse / Expand)
+const appLayout = document.querySelector('.app-layout');
+const desktopSidebarCollapseBtn = document.getElementById('desktopSidebarCollapseBtn');
+const desktopSidebarExpandBtn = document.getElementById('desktopSidebarExpandBtn');
+
+// Restore saved desktop sidebar preference
+if (localStorage.getItem('ebm_desktop_sidebar_collapsed') === 'true') {
+    if (appLayout) appLayout.classList.add('sidebar-collapsed');
+}
+
+function setDesktopSidebarCollapsed(collapsed) {
+    if (!appLayout) return;
+    appLayout.classList.toggle('sidebar-collapsed', collapsed);
+    localStorage.setItem('ebm_desktop_sidebar_collapsed', collapsed ? 'true' : 'false');
+}
+
+if (desktopSidebarCollapseBtn) {
+    desktopSidebarCollapseBtn.addEventListener('click', () => setDesktopSidebarCollapsed(true));
+}
+if (desktopSidebarExpandBtn) {
+    desktopSidebarExpandBtn.addEventListener('click', () => setDesktopSidebarCollapsed(false));
+}
+
 // Theme Management (Light / Dark mode toggle)
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -341,8 +364,7 @@ function appendMessage(text, isUser = false, save = true) {
         const authorHeader = document.createElement('div');
         authorHeader.className = 'bot-author-header';
         authorHeader.innerHTML = `
-            <img src="/static/logo.png" alt="" class="bot-badge-logo">
-            <span class="bot-author-name">Ask-BoardMate</span>
+            <span class="bot-author-name">Ask BoardMate</span>
         `;
         msgDiv.appendChild(authorHeader);
     }
@@ -377,8 +399,7 @@ function showTypingIndicator() {
     const authorHeader = document.createElement('div');
     authorHeader.className = 'bot-author-header';
     authorHeader.innerHTML = `
-        <img src="/static/logo.png" alt="" class="bot-badge-logo">
-        <span class="bot-author-name">Ask-BoardMate</span>
+        <span class="bot-author-name">Ask BoardMate</span>
     `;
     indicatorDiv.appendChild(authorHeader);
 
@@ -432,7 +453,7 @@ function renderWelcomeHero() {
     chatMessages.innerHTML = `
         <div class="welcome-hero" id="welcomeHero">
             <div class="hero-logo-wrap">
-                <img src="/static/logo.png" alt="E-BoardMate" class="hero-logo-img">
+                <img src="/static/askboardmate.png" alt="Ask BoardMate" class="hero-circle-logo">
             </div>
             <div class="hero-pill">TPC Student Housing Assistant</div>
             <h2 class="hero-title">How can I help you find housing today?</h2>

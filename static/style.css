@@ -162,7 +162,7 @@ body {
     flex-direction: column;
     flex-shrink: 0;
     z-index: 1000;
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease;
+    transition: margin-left 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, border-color 0.25s ease;
     user-select: none;
 }
 
@@ -179,33 +179,43 @@ body {
     gap: 10px;
 }
 
-.brand-logo-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    padding: 3px 6px;
-    border-radius: 8px;
-    background: var(--bg-surface);
+.brand-circle-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border-color);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: var(--bg-surface);
+    display: block;
     flex-shrink: 0;
 }
 
-.brand-logo-img {
-    height: 24px;
-    width: auto;
-    max-width: 110px;
-    object-fit: contain;
+.top-brand-circle-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    display: block;
+    flex-shrink: 0;
+}
+
+.hero-circle-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 14px rgba(39, 109, 84, 0.16);
+    border: 2px solid var(--border-color);
+    background: var(--bg-surface);
     display: block;
 }
 
-.top-brand-logo-img {
-    height: 24px;
-    width: auto;
-    max-width: 105px;
-    object-fit: contain;
-    display: block;
+.brand-logo-wrap {
+    display: none;
 }
 
 .brand-info {
@@ -246,6 +256,10 @@ body {
 .sidebar-icon-btn:hover {
     background: var(--bg-sidebar-hover);
     color: var(--text-main);
+}
+
+.collapse-sidebar-btn {
+    display: flex;
 }
 
 .close-sidebar-btn {
@@ -469,6 +483,36 @@ body {
     transition: background 0.25s ease;
 }
 
+/* Desktop Sidebar Expand Button (Shown when sidebar is smoothly collapsed) */
+.desktop-sidebar-expand-btn {
+    display: none;
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 95;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-chip);
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.desktop-sidebar-expand-btn:hover {
+    background: var(--bg-sidebar-hover);
+    color: var(--text-main);
+    border-color: var(--border-hover);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 /* Top Mobile / Minimal Bar */
 .top-nav-bar {
     display: none;
@@ -566,8 +610,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 22px;
-    border-radius: 16px;
+    padding: 6px;
+    border-radius: 50%;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     margin-bottom: 20px;
@@ -701,28 +745,22 @@ body {
 }
 
 .bot-author-header {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     user-select: none;
 }
 
 .bot-badge-logo {
-    height: 18px;
-    width: auto;
-    max-width: 48px;
-    object-fit: contain;
-    border-radius: 3px;
-    display: inline-block;
+    display: none;
 }
 
 .bot-author-name {
     font-family: 'Newsreader', Georgia, serif;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--brand-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
 }
 
 .bot-message .message-content {
@@ -1167,6 +1205,14 @@ body {
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 768px) {
+    .collapse-sidebar-btn {
+        display: none !important;
+    }
+
+    .desktop-sidebar-expand-btn {
+        display: none !important;
+    }
+
     .sidebar {
         position: fixed;
         top: 0;
@@ -1238,6 +1284,21 @@ body {
     }
     .sidebar-backdrop {
         display: none !important;
+    }
+    .collapse-sidebar-btn {
+        display: flex;
+    }
+    .desktop-sidebar-expand-btn {
+        display: flex;
+    }
+    .app-layout.sidebar-collapsed .sidebar {
+        margin-left: -270px;
+        pointer-events: none;
+    }
+    .app-layout.sidebar-collapsed .desktop-sidebar-expand-btn {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
     }
 }
 
