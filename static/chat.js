@@ -1,9 +1,10 @@
+const chatStreamContainer = document.querySelector('.chat-stream-container');
 const chatMessages = document.getElementById('chatMessages');
 const chatForm = document.getElementById('chatForm');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
-const themeLabel = document.getElementById('themeLabel');
+const chatSessionsList = document.getElementById('chatSessionsList');
 
 // Sidebar Drawer Elements (Mobile & Responsive)
 const sidebar = document.getElementById('sidebar');
@@ -48,13 +49,14 @@ if (desktopSidebarExpandBtn) {
     desktopSidebarExpandBtn.addEventListener('click', () => setDesktopSidebarCollapsed(false));
 }
 
-// Theme Management (Light / Dark mode toggle)
+// Theme Management (Light / Dark mode toggle with icon-only button)
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-bs-theme', theme);
     localStorage.setItem('ebm-theme', theme);
-    if (themeLabel) {
-        themeLabel.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    if (themeToggleBtn) {
+        themeToggleBtn.setAttribute('title', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     }
 }
 
@@ -348,8 +350,17 @@ function formatMarkdown(text) {
     return html;
 }
 
-function scrollToBottom() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+// Reliable Smooth Scroll to Bottom for Chat Stream
+function scrollToBottom(smooth = true) {
+    if (!chatStreamContainer) return;
+    if (smooth) {
+        chatStreamContainer.scrollTo({
+            top: chatStreamContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+    } else {
+        chatStreamContainer.scrollTop = chatStreamContainer.scrollHeight;
+    }
 }
 
 function appendMessage(text, isUser = false, save = true) {
@@ -380,14 +391,24 @@ function appendMessage(text, isUser = false, save = true) {
 
     msgDiv.appendChild(contentDiv);
     chatMessages.appendChild(msgDiv);
-    scrollToBottom();
+    scrollToBottom(true);
+
+    // Re-scroll when any images/carousels finish loading
+    const imgs = msgDiv.querySelectorAll('img');
+    imgs.forEach(img => {
+        if (!img.complete) {
+            img.addEventListener('load', () => scrollToBottom(true), { once: true });
+        }
+    });
 
     if (save) {
-        savedUiMessages.push({ text, isUser });
-        if (savedUiMessages.length > 50) savedUiMessages = savedUiMessages.slice(-50);
-        try {
-            localStorage.setItem('ebm_chat_ui_messages', JSON.stringify(savedUiMessages));
-        } catch (e) {}
+        const session = getCurrentSession();
+        if (session) {
+            session.messages.push({ text, isUser });
+            if (session.messages.length > 50) session.messages = session.messages.slice(-50);
+            session.updatedAt = Date.now();
+            saveSessionsToStorage();
+        }
     }
 }
 
@@ -415,7 +436,7 @@ function showTypingIndicator() {
 
     indicatorDiv.appendChild(contentDiv);
     chatMessages.appendChild(indicatorDiv);
-    scrollToBottom();
+    scrollToBottom(true);
 }
 
 function removeTypingIndicator() {
@@ -425,27 +446,175 @@ function removeTypingIndicator() {
     }
 }
 
-// Session & Conversational Memory Management
-let currentSessionId = localStorage.getItem('ebm_session_id');
-if (!currentSessionId) {
-    currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('ebm_session_id', currentSessionId);
+// ==========================================================================
+// Multi-Session Chat Management (Claude & ChatGPT Style)
+// ==========================================================================
+let allSessions = [];
+try {
+    const stored = localStorage.getItem('ebm_chat_sessions');
+    if (stored) allSessions = JSON.parse(stored);
+} catch (e) {
+    allSessions = [];
 }
 
-let conversationHistory = [];
-try {
-    const savedHist = localStorage.getItem('ebm_conversation_history');
-    if (savedHist) conversationHistory = JSON.parse(savedHist);
-} catch (e) {
-    conversationHistory = [];
+// Migrate legacy single session if present
+if (allSessions.length === 0) {
+    let oldUi = [];
+    try { oldUi = JSON.parse(localStorage.getItem('ebm_chat_ui_messages') || '[]'); } catch (e) {}
+    let oldHist = [];
+    try { oldHist = JSON.parse(localStorage.getItem('ebm_conversation_history') || '[]'); } catch (e) {}
+    if (oldUi.length > 0) {
+        const firstUser = oldUi.find(m => m.isUser);
+        const title = firstUser ? (firstUser.text.length > 28 ? firstUser.text.substring(0, 28) + '...' : firstUser.text) : 'Previous Chat';
+        allSessions.push({
+            id: localStorage.getItem('ebm_session_id') || ('sess_' + Date.now()),
+            title: title,
+            updatedAt: Date.now(),
+            messages: oldUi,
+            history: oldHist
+        });
+        saveSessionsToStorage();
+    }
 }
 
-let savedUiMessages = [];
-try {
-    const savedUi = localStorage.getItem('ebm_chat_ui_messages');
-    if (savedUi) savedUiMessages = JSON.parse(savedUi);
-} catch (e) {
-    savedUiMessages = [];
+let currentSessionId = localStorage.getItem('ebm_active_session_id');
+if (!currentSessionId || !allSessions.some(s => s.id === currentSessionId)) {
+    if (allSessions.length > 0) {
+        currentSessionId = allSessions[0].id;
+    } else {
+        const initialSess = createNewSession();
+        allSessions.push(initialSess);
+        currentSessionId = initialSess.id;
+        saveSessionsToStorage();
+    }
+    localStorage.setItem('ebm_active_session_id', currentSessionId);
+}
+
+function createNewSession() {
+    return {
+        id: 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        title: 'New chat',
+        updatedAt: Date.now(),
+        messages: [],
+        history: []
+    };
+}
+
+function getCurrentSession() {
+    let s = allSessions.find(item => item.id === currentSessionId);
+    if (!s) {
+        s = createNewSession();
+        allSessions.unshift(s);
+        currentSessionId = s.id;
+        localStorage.setItem('ebm_active_session_id', currentSessionId);
+        saveSessionsToStorage();
+    }
+    return s;
+}
+
+function saveSessionsToStorage() {
+    try {
+        localStorage.setItem('ebm_chat_sessions', JSON.stringify(allSessions));
+    } catch (e) {}
+}
+
+function renderSessionsList() {
+    if (!chatSessionsList) return;
+    chatSessionsList.innerHTML = '';
+
+    if (allSessions.length === 0) {
+        chatSessionsList.innerHTML = '<li class="empty-sessions-hint">No saved chats yet. Start a conversation!</li>';
+        return;
+    }
+
+    allSessions.forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'session-item-wrap';
+        const isActive = s.id === currentSessionId;
+
+        const btn = document.createElement('button');
+        btn.className = `session-item ${isActive ? 'active' : ''}`;
+        btn.setAttribute('aria-label', `Open chat: ${s.title}`);
+        btn.innerHTML = `
+            <span class="session-item-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </span>
+            <span class="session-item-title">${escapeAttr(s.title || 'New chat')}</span>
+        `;
+        btn.addEventListener('click', () => switchSession(s.id));
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'session-delete-btn';
+        delBtn.setAttribute('title', 'Delete chat');
+        delBtn.setAttribute('aria-label', `Delete chat: ${s.title}`);
+        delBtn.innerHTML = `
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+        `;
+        delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteSession(s.id);
+        });
+
+        li.appendChild(btn);
+        li.appendChild(delBtn);
+        chatSessionsList.appendChild(li);
+    });
+}
+
+function switchSession(sessionId) {
+    if (sessionId === currentSessionId) {
+        closeSidebar();
+        return;
+    }
+    if (isGenerating) {
+        stopGeneration();
+    }
+    currentSessionId = sessionId;
+    localStorage.setItem('ebm_active_session_id', currentSessionId);
+    closeSidebar();
+    loadActiveSessionUi();
+    renderSessionsList();
+    if (messageInput) messageInput.focus();
+}
+
+function deleteSession(sessionId) {
+    const idx = allSessions.findIndex(s => s.id === sessionId);
+    if (idx === -1) return;
+
+    allSessions.splice(idx, 1);
+    saveSessionsToStorage();
+
+    if (sessionId === currentSessionId) {
+        if (allSessions.length > 0) {
+            currentSessionId = allSessions[0].id;
+        } else {
+            const newS = createNewSession();
+            allSessions.push(newS);
+            currentSessionId = newS.id;
+            saveSessionsToStorage();
+        }
+        localStorage.setItem('ebm_active_session_id', currentSessionId);
+        loadActiveSessionUi();
+    }
+    renderSessionsList();
+}
+
+function loadActiveSessionUi() {
+    const session = getCurrentSession();
+    chatMessages.innerHTML = '';
+    if (session.messages && session.messages.length > 0) {
+        session.messages.forEach(m => {
+            appendMessage(m.text, m.isUser, false);
+        });
+        scrollToBottom(false);
+    } else {
+        renderWelcomeHero();
+    }
 }
 
 // Render Claude-Style Welcome Hero with Suggestion Chips
@@ -485,15 +654,9 @@ window.sendSuggestedPrompt = function(promptText) {
     chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 };
 
-// Initial view: restore saved messages or display welcome hero
-if (savedUiMessages && savedUiMessages.length > 0) {
-    chatMessages.innerHTML = '';
-    savedUiMessages.forEach(m => {
-        appendMessage(m.text, m.isUser, false);
-    });
-} else {
-    renderWelcomeHero();
-}
+// Initial view: restore active session messages and render sessions list
+renderSessionsList();
+loadActiveSessionUi();
 
 // Textarea Auto-Resize & Keyboard Enter handling
 if (messageInput) {
@@ -510,33 +673,36 @@ if (messageInput) {
     });
 }
 
-// "New Chat" / Reset Session Button
+// "New Chat" / Create Session Button (Preserves previous chats)
 const newChatBtn = document.getElementById('newChatBtn');
 
-async function handleResetSession() {
-    if (confirm("Start a new chat session? This will clear your current conversation history.")) {
-        closeSidebar();
-        if (isGenerating) {
-            stopGeneration();
-        }
+function handleNewChat() {
+    closeSidebar();
+    if (isGenerating) {
+        stopGeneration();
+    }
 
-        try {
-            await fetch('/api/chat/reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: currentSessionId })
-            });
-        } catch (e) {}
-
-        currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-        localStorage.setItem('ebm_session_id', currentSessionId);
-
-        conversationHistory = [];
-        savedUiMessages = [];
-        localStorage.removeItem('ebm_conversation_history');
-        localStorage.removeItem('ebm_chat_ui_messages');
-
+    const current = getCurrentSession();
+    // If current session is already empty, just stay on it
+    if (current && current.messages.length === 0) {
         renderWelcomeHero();
+        if (messageInput) {
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            messageInput.focus();
+        }
+        return;
+    }
+
+    const newS = createNewSession();
+    allSessions.unshift(newS);
+    currentSessionId = newS.id;
+    localStorage.setItem('ebm_active_session_id', currentSessionId);
+    saveSessionsToStorage();
+
+    renderSessionsList();
+    renderWelcomeHero();
+    if (messageInput) {
         messageInput.value = '';
         messageInput.style.height = 'auto';
         messageInput.focus();
@@ -544,7 +710,7 @@ async function handleResetSession() {
 }
 
 if (newChatBtn) {
-    newChatBtn.addEventListener('click', handleResetSession);
+    newChatBtn.addEventListener('click', handleNewChat);
 }
 
 let currentAbortController = null;
@@ -587,18 +753,23 @@ chatForm.addEventListener('submit', async (e) => {
     const query = messageInput.value.trim();
     if (!query) return;
 
-    // If currently generating a previous response and user submits a new prompt,
-    // cancel the in-flight response and start the new one immediately
     if (isGenerating) {
         stopGeneration();
+    }
+
+    const session = getCurrentSession();
+
+    // Auto-name session from the first prompt
+    if (session.messages.length === 0 || session.title === 'New chat') {
+        let cleanTitle = query.replace(/[^\w\s\u00C0-\u017F₱-]/gi, '').trim();
+        session.title = cleanTitle.length > 26 ? cleanTitle.substring(0, 26) + '...' : (cleanTitle || 'Conversation');
+        renderSessionsList();
     }
 
     // Append user query to UI and persist
     appendMessage(query, true, true);
     messageInput.value = '';
     messageInput.style.height = 'auto';
-
-    // Keep message input clickable and focused so user can type freely
     messageInput.focus();
 
     showTypingIndicator();
@@ -607,6 +778,7 @@ chatForm.addEventListener('submit', async (e) => {
     currentAbortController = new AbortController();
 
     try {
+        const historyPayload = (session.history || []).slice(-10);
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -614,9 +786,9 @@ chatForm.addEventListener('submit', async (e) => {
             },
             signal: currentAbortController.signal,
             body: JSON.stringify({
-                session_id: currentSessionId,
+                session_id: session.id,
                 query: query,
-                history: conversationHistory.slice(-10) // keep last 10 turns
+                history: historyPayload
             })
         });
 
@@ -630,14 +802,14 @@ chatForm.addEventListener('submit', async (e) => {
         const replyText = data.answer || "I could not find an answer for that inquiry.";
         
         // Record in conversation history for multi-turn context
-        conversationHistory.push({ role: 'user', content: query });
-        conversationHistory.push({ role: 'assistant', content: replyText });
-        if (conversationHistory.length > 20) {
-            conversationHistory = conversationHistory.slice(-20);
+        if (!session.history) session.history = [];
+        session.history.push({ role: 'user', content: query });
+        session.history.push({ role: 'assistant', content: replyText });
+        if (session.history.length > 20) {
+            session.history = session.history.slice(-20);
         }
-        try {
-            localStorage.setItem('ebm_conversation_history', JSON.stringify(conversationHistory));
-        } catch (e) {}
+        session.updatedAt = Date.now();
+        saveSessionsToStorage();
         
         appendMessage(replyText, false, true);
 
