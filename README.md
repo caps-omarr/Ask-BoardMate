@@ -1,129 +1,266 @@
-# E-BoardMate: Generative AI RAG System Layer
-### Capstone Project for IS Professional Elective #4: Generative AI Systems
-**Target Campus:** Talibon Polytechnic College (TPC), Bohol, Philippines  
-**Live Production Host:** [https://eboardmate.onrender.com](https://eboardmate.onrender.com)  
+# Ask-BoardMate: Generative AI RAG System Layer
+> **Intelligent Retrieval-Augmented Generation (RAG) Housing Assistant for Talibon Polytechnic College (TPC)**  
+> *Coursework & Capstone Submission for IS Professional Elective: Generative AI Systems*
+
+[![Live Deployed App](https://img.shields.io/badge/Live%20App-Railway%20Deployment-00C7B7?style=for-the-badge&logo=railway&logoColor=white)](https://eboardrag-production.up.railway.app)
+[![Live Production Host](https://img.shields.io/badge/Production%20Portal-eboardmate.onrender.com-1B4D3E?style=for-the-badge)](https://eboardmate.onrender.com)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Uvicorn-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Gemini API](https://img.shields.io/badge/LLM-Google%20Gemini%20API-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 
 ---
 
-## 📌 Project Overview
-**E-BoardMate** is an intelligent student boarding house locator and reservation system engineered for **Talibon Polytechnic College (TPC)** students in Bohol. This repository contains the complete implementation for:
-- **CHECKPOINT 1 (Prelim: Foundation & Data Pipeline)**
-- **CHECKPOINT 2 (Midterm: Prompt Architecture & Vector Indexing)**
+## 📌 1. Project Title & Purpose
+
+### Project Title
+**Ask-BoardMate: AI-Powered RAG Student Housing Assistant**
+
+### Problem Statement
+Finding accredited, safe, and affordable student boarding houses near **Talibon Polytechnic College (TPC)** in Talibon, Bohol, Philippines is traditionally stressful and tedious. Students often search door-to-door, face unexpected utility surcharges, misunderstand curfew or gender restrictions, or struggle to reach verified landlords.
+
+### Solution Purpose
+**Ask-BoardMate** is an intelligent, conversational Retrieval-Augmented Generation (RAG) assistant that empowers TPC students to query verified boarding house listings in natural language (English, Taglish, and Bisaya/Cebuano). It provides:
+- Instant, grounded details on monthly rent, utility billing (water/electricity), room and bedspace vacancies.
+- Accurate walking distances and estimated walking time to the TPC campus anchor point (`10.1167, 124.2833`).
+- Direct landlord contact info and official reservation hand-off links.
+- Conversational multi-turn memory across turns and page refreshes.
+- Zero-hallucination guardrails that strictly refuse out-of-scope queries (e.g. homework, general trivia) or unlisted properties.
 
 ---
 
-## 📂 Repository Directory Structure
+## 🌐 2. Live Deployed Application & Video Demonstration
 
-```text
-eboardrag/
-├── data/
-│   ├── raw_listings_export.json        # Verified active listing records extracted from eboardmate.onrender.com
-│   └── processed_chunks.json           # Cleaned, normalized, and tokenized text chunks
-├── docs/
-│   ├── checkpoint1_proposal.md         # 1-2 page Project Proposal & Success Criteria
-│   ├── checkpoint1_reflection.md       # 1/2 page reflection on live data anomalies & sanitation
-│   ├── checkpoint2_prompt_engineering.md # 3 structured system prompts + anti-hallucination tests
-│   └── checkpoint2_distance_metrics.md # 1 page comparative analysis (Cosine vs Euclidean vs Dot Product)
-├── src/
-│   ├── main.py                         # Primary E-BoardMate AI Interactive Student CLI
-│   ├── fetch_live_data.py              # Script to extract/export active listings from eboardmate.onrender.com
-│   ├── preprocessing.py                # Cleaning, normalization, tokenization, and walking-distance pipeline
-│   ├── embeddings_demo.py              # Dense vector embedding generation script & model justification
-│   ├── vector_store.py                 # ChromaDB indexing with metadata filtering & similarity queries
-│   ├── distance_benchmark.py           # Mathematical comparison of Cosine, Euclidean (L2), and Dot Product
-│   └── chat_api_demo.py                # LLM API script testing 3 prompts with grounded outputs
-├── main.py                             # Root CLI entrypoint launcher
-├── .env.example
-├── requirements.txt
-└── README.md                           # Setup and checkpoint execution guide
+| Item | Details / Links |
+| :--- | :--- |
+| **Live Deployed App URL** | [https://eboardrag-production.up.railway.app](https://eboardrag-production.up.railway.app) *(or live Railway deployment URL)* |
+| **Production Web Portal** | [https://eboardmate.onrender.com](https://eboardmate.onrender.com) |
+| **Demo Video Link** | *Add your YouTube (Unlisted) or Google Drive link here (e.g., `https://youtu.be/...`)* |
+| **Demo Video Script** | [`Ask_BoardMate_Demo_Video_Script.docx`](Ask_BoardMate_Demo_Video_Script.docx) *(Complete 5-8 min recording script provided in repo)* |
+| **Public GitHub Repo** | [https://github.com/caps-omarr/Ask-BoardMate](https://github.com/caps-omarr/Ask-BoardMate) |
+| **Access Requirements** | **No login, no authentication, and no installation required** — open directly in any desktop or mobile browser. |
+
+---
+
+## ⚠️ 3. Usage Limits & API Quota Notice (Requirement 1.6)
+
+> [!NOTE]  
+> **Evaluator / Instructor Notice on Free-Tier API Quotas:**  
+> This application connects to the **Google Gemini API** (`google-genai` SDK) using a developer tier key.
+> - **Primary Active Models:** `gemini-3.5-flash-lite` and `gemini-3.1-flash-lite` (with automatic rollover to `gemini-flash-latest`, `gemini-3.6-flash`, and `gemini-3.8-flash`).
+> - **Rate Limit Headroom:** Free-tier limits allow **15 requests per minute (RPM)** and up to **1,500 requests per day (RPD)**.
+> - **Graceful Grounded Fallbacks:** If the external Gemini API is momentarily unavailable or rate-limited (`429 RESOURCE_EXHAUSTED`), Ask-BoardMate automatically fails over to internal zero-hallucination grounded handlers. It continues to deliver verified listing details, curfew rules, landlord contact hand-offs, and polite refusal messages without crashing or hallucinating.
+
+---
+
+## 📂 4. Knowledge Source & Sample Documents Origin
+
+All RAG knowledge chunks originate from real, verified boarding house records extracted directly from the live production portal [eboardmate.onrender.com](https://eboardmate.onrender.com):
+- **Source Dataset:** `data/raw_listings_export.json` and `data/processed_chunks.json`.
+- **Scope & Verification:** 15 accredited boarding houses in Talibon, Bohol, verified under strict accreditation filters (`status = 'approved'`, `is_verified = 1`, and `owner.status = 'active'`).
+- **Extracted Attributes:**
+  - Boarding House Name, Barangay / Sitio Address, and Landlord Name.
+  - Monthly Rent (₱) and specific billing policies (water and electricity inclusions/sub-metering).
+  - Allowed Genders (`Female Only`, `Male Only`, `Any Gender (All)`).
+  - Available Room count and Bedspace vacancies.
+  - House Rules, Curfew hours (e.g., 10:00 PM curfew), and Amenities (Wi-Fi, study area, cooking access).
+  - Landlord Direct Contact Phone numbers.
+  - GPS Coordinates (`latitude`, `longitude`) used to calculate exact Haversine distance and walking time in minutes to TPC campus.
+  - Direct live URLs (`https://eboardmate.onrender.com/boarding-houses/[slug]`) and photo gallery URLs.
+
+---
+
+## 🛠️ 5. Technology Stack & Architecture
+
+```
+                          ASK-BOARDMATE RAG ARCHITECTURE
+  +-------------------------------------------------------------------------+
+  |                                                                         |
+  |   1. INGESTION & PREPROCESSING                                          |
+  |      eboardmate.onrender.com -> raw_listings_export.json                |
+  |      -> Text Cleaning, Normalization & Haversine Distance Calculation   |
+  |      -> data/processed_chunks.json                                      |
+  |                                                                         |
+  |   2. EMBEDDINGS & VECTOR STORE                                          |
+  |      sentence-transformers/all-MiniLM-L6-v2 (384-dimensional dense vectors)|
+  |      Indexed via ChromaDB + NumPy Cosine Similarity Matrix              |
+  |                                                                         |
+  |   3. RETRIEVAL & QUERY AUGMENTATION                                     |
+  |      User Query -> Coreference Resolution & Preference Filtering       |
+  |      -> Top-K Dense Semantic Chunks + 15-Listing Directory Overview     |
+  |                                                                         |
+  |   4. GENERATION & GUARDRAILS                                            |
+  |      Google Gemini API (gemini-3.5-flash-lite / gemini-3.1-flash-lite)  |
+  |      System Instruction: Strict Grounding + Multi-turn Memory + Refusal|
+  |                                                                         |
+  |   5. SERVING & INTERFACE                                                |
+  |      FastAPI + Uvicorn Python Backend                                  |
+  |      Vanilla HTML5 / Modern CSS (Claude-aesthetic) / JavaScript        |
+  |      Containerized on Docker & Publicly Deployed on Railway            |
+  +-------------------------------------------------------------------------+
 ```
 
+### Detailed Component Specifications:
+1. **Embedding Model (`sentence-transformers/all-MiniLM-L6-v2`):**
+   - Generates 384-dimensional dense vector embeddings.
+   - Selected for high semantic fidelity, fast inference (<15ms on CPU), and zero GPU dependency.
+2. **Vector Indexing & Retrieval:**
+   - **ChromaDB** client with persistent vector store in `chroma_db/`.
+   - **NumPy Dense Cosine Similarity** matrix for ultra-fast in-memory retrieval on cloud containers.
+   - **Metadata Filtering:** Filters by budget thresholds, gender restrictions, and room availability.
+3. **Large Language Model (LLM):**
+   - **Google Gemini API** (`gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-flash-latest`) via `google-genai`.
+   - Conversational multi-turn history with coreference resolution (e.g. resolving "its curfew" to the previously discussed property).
+   - Tone adaptation: Fluently matches student vibes in English, Taglish, or Bisaya.
+4. **Backend Framework:**
+   - **FastAPI** with asynchronous request handlers.
+   - Endpoints: `POST /api/chat`, `POST /api/chat/reset`, `GET /health`, `GET /api/status`, `GET /`.
+5. **Frontend UI/UX:**
+   - Claude-inspired aesthetic utilizing smooth Alabaster (`#F8F7F4`) and Sage gradients (no harsh plain white).
+   - Sidebar conversation management with multi-session history, new chat creation, and collapsible toggle.
+   - Dark Mode / Light Mode theme switch with persistent `localStorage`.
+   - Quick suggestion prompt chips and mobile-responsive layout.
+
 ---
 
-## ⚙️ Environment Setup & Installation
+## ⚙️ 6. How to Run Locally
 
-### 1. Prerequisites
-- Python 3.10+ installed
-- Virtual environment (recommended)
+### Prerequisites
+- Python 3.10 or higher
+- Git
+- Google Gemini API Key ([Get a free key at Google AI Studio](https://aistudio.google.com/))
 
-### 2. Install Dependencies
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/caps-omarr/Ask-BoardMate.git
+cd Ask-BoardMate
+```
+
+### Step 2: Create and Activate Virtual Environment
+```bash
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### Step 3: Install Required Packages
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment Variables
-Copy `.env.example` to `.env` and set your Google Gemini API Key:
+### Step 4: Configure Environment Variables
+Copy `.env.example` to `.env` and insert your Gemini API Key:
 ```bash
 cp .env.example .env
 ```
+Inside `.env`:
+```env
+GEMINI_API_KEY=your_actual_gemini_api_key_here
+```
 
----
+### Step 5: Launch the Application
+You can run the web server or the CLI version:
 
-## 🤖 MAIN STUDENT CLI (E-BOARDMATE AI)
+#### Option A: Web Application (FastAPI + Modern UI)
+```bash
+python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000
+```
+Open your browser and navigate to: **`http://localhost:8000`**
 
-Launch the interactive student CLI terminal where TPC students ask housing questions in real-time:
-
+#### Option B: Terminal Student CLI
 ```bash
 python main.py
 ```
-*(or run `python src/main.py`)*
-
-### Interactive Features:
-- **Natural Language Search**: Ask for budget dorms, gender restrictions, or walking distance.
-- **Landlord Contact Tickets**: Get landlord phone numbers and direct links to `https://eboardmate.onrender.com/boarding-houses/[slug]`.
-- **Anti-Hallucination Guardrails**: Auto-refuses out-of-scope non-housing queries (homework, general trivia).
 
 ---
 
-## 🚀 Step-by-Step Execution Guide by Checkpoint
+## 🧪 7. Sample Questions & RAG Grounding Verification
 
-### CHECKPOINT 1 (Prelim: Data Pipeline & Preprocessing)
+The table below details benchmark queries demonstrating full RAG functionality, including multi-turn memory and out-of-scope anti-hallucination refusals:
 
-#### Step 1: Extract Verified Live Listings
-Pulls active listings from `eboardmate.onrender.com`, enforcing `status = 'approved'`, `is_verified = 1`, and `owner.status = 'active'`. Outputs `data/raw_listings_export.json`.
-```bash
-python src/fetch_live_data.py
-```
+| Test Category | Student Query | Expected RAG Pipeline Behavior | Grounded Output Summary |
+| :--- | :--- | :--- | :--- |
+| **1. Grounded Housing Search** | *"I am a female student looking for an affordable dorm near TPC under 1000 pesos with water included."* | Vector retrieval filters by gender (`Female Only`) and rent (`<= 1000`). Injects Torres Boarding House chunk into Gemini prompt. | Recommends **Torres Boarding House** (₱700/mo, San Isidro, water & electricity included, 2 rooms available, 4.91 km ~61.3 mins walk, live link). |
+| **2. Multi-Turn Coreference & Contact** | *"What are its curfew hours and how do I contact the landlord to reserve?"* | Session memory resolves *"its"* to Torres Boarding House without re-stating name. Formats Landlord Ticket. | Returns 10:00 PM curfew, cleanliness rules, Landlord Office direct phone (`+63 917 000 1122`), and reservation link. |
+| **3. Conversational Gratitude / Vibe** | *"ahh wala mna bai, salamat kau bai"* | Intent classified as `closing`. Suppresses listing search to avoid unwanted dumps. Matches Bisaya dialect. | Warmly replies in Bisaya: *"Way sapayan bai! Walay problema gyud. Kung magkinahanglan ka'g tabang... chat lang diri bisan kanus-a."* |
+| **4. Out-of-Scope Refusal (Cannot Answer)** | *"Can you write a Python script for my calculus programming homework?"* | Guardrail triggers on non-housing query (`homework`, `script`). Rejects out-of-scope generation. | *"I am Ask BoardMate, specialized only in TPC student boarding house listings and housing policies in Talibon, Bohol. How can I assist you with your boarding house search?"* |
+| **5. Unlisted Property Refusal** | *"How much is monthly rent at Sunset Villa Boarding House?"* | Scans 15 accredited listings; property not found in knowledge chunks. Anti-hallucination triggers. | Accurately states that *Sunset Villa Boarding House* is not an accredited listing in the official TPC directory. Refuses to invent prices. |
 
-#### Step 2: Execute Data Preprocessing Pipeline
-Sanitizes raw HTML, normalizes text/gender terms, computes Haversine distance and walking time to TPC campus anchor (`10.1167, 124.2833`), and outputs `data/processed_chunks.json`.
-```bash
-python src/preprocessing.py
-```
+---
 
-#### Step 3: Generate Vector Embeddings & View Model Justification
-Loads `sentence-transformers/all-MiniLM-L6-v2`, generates 384-dimensional dense vectors, and displays model latency justification.
-```bash
-python src/embeddings_demo.py
+## 📽️ 8. Demo Video Structure (5 to 8 Minutes)
+
+A complete spoken script with exact action cues is available in [`Ask_BoardMate_Demo_Video_Script.docx`](Ask_BoardMate_Demo_Video_Script.docx). The video covers:
+
+1. **0:00 – 1:15 | The Problem & Knowledge Source:**
+   - Housing pain points for Talibon Polytechnic College (TPC) students.
+   - Ground truth data source: 15 verified accredited boarding houses from `eboardmate.onrender.com`.
+2. **1:15 – 2:30 | Architecture & Tech Stack:**
+   - Preprocessing with Haversine walking distances.
+   - `sentence-transformers/all-MiniLM-L6-v2` dense 384-d embeddings.
+   - ChromaDB + NumPy vector similarity matrix.
+   - Google Gemini API (`gemini-3.5-flash-lite`, `google-genai`).
+   - FastAPI + Claude-aesthetic web UI on Railway.
+3. **2:30 – 3:30 | Live Walkthrough of Deployed App:**
+   - Clean interface, sidebar session history, theme toggle (Dark/Light), prompt chips.
+   - Zero login/installation requirement.
+4. **3:30 – 6:00 | Live Testing 3+ Sample Questions:**
+   - Question 1: Specific housing search with budget & gender constraints.
+   - Question 2: Conversational follow-up resolving pronouns ("its curfew") + reservation hand-off.
+   - Bonus: Conversational Bisaya closing ("salamat kau bai").
+   - Question 3: Out-of-scope question documents cannot answer (homework refusal & unlisted property).
+5. **6:00 – 7:00 | Future Improvements & Conclusion:**
+   - Interactive GPS map visualization with walking routes.
+   - Direct SMS/messaging gateway for landlord inquiries.
+   - Verified student reviews and peer rating ingestion.
+   - Hybrid dense semantic + sparse BM25 retrieval.
+
+---
+
+## 📁 9. Repository Directory Layout
+
+```text
+eboardrag/
+├── data/
+│   ├── raw_listings_export.json        # Verified active listing records from eboardmate.onrender.com
+│   └── processed_chunks.json           # Cleaned, normalized, and tokenized text chunks
+├── docs/
+│   ├── checkpoint1_proposal.md         # Project Proposal & Success Criteria
+│   ├── checkpoint1_reflection.md       # Data engineering reflection & live data sanitation
+│   ├── checkpoint2_prompt_engineering.md # Structured system prompts & anti-hallucination tests
+│   └── checkpoint2_distance_metrics.md # Comparative analysis (Cosine vs Euclidean vs Dot Product)
+├── src/
+│   ├── main.py                         # Conversational RAG logic & LLM generation handlers
+│   ├── fetch_live_data.py              # Export active listings from eboardmate.onrender.com
+│   ├── preprocessing.py                # Preprocessing pipeline with Haversine distance calculations
+│   ├── embeddings_demo.py              # Dense vector embedding generation script & model justification
+│   ├── vector_store.py                 # ChromaDB indexing with metadata filtering & similarity queries
+│   ├── distance_benchmark.py           # Mathematical comparison of Cosine, Euclidean (L2), and Dot Product
+│   └── chat_api_demo.py                # LLM API script testing 3 prompts with grounded outputs
+├── static/
+│   ├── index.html                      # Modern Claude-style web interface
+│   ├── style.css                       # Responsive stylesheet with dark/light themes & Alabaster palette
+│   ├── chat.js                         # Chat UI state, session persistence, and API integration
+│   ├── askboardmate.jfif               # Circular Ask-BoardMate emblem
+│   └── logo.png                        # E-BoardMate branding asset
+├── Ask_BoardMate_Demo_Video_Script.docx # 5-8 minute screen recording script for capstone submission
+├── sample_student_queries.txt          # Benchmark student test queries across 4 categories
+├── Dockerfile                          # Production container configuration for Railway deployment
+├── api.py                              # FastAPI backend application with session state & RAG endpoints
+├── main.py                             # Root CLI entrypoint launcher
+├── requirements.txt                    # Python package dependencies
+├── .env.example                        # Example environment variables template (no secrets)
+└── README.md                           # Comprehensive project documentation
 ```
 
 ---
 
-### CHECKPOINT 2 (Midterm: Prompt Architecture & Vector Indexing)
+## 🔒 10. Security & Responsible AI Practices
 
-#### Step 4: ChromaDB Vector Indexing & Metadata Filtering
-Ingests `data/processed_chunks.json` into ChromaDB and executes metadata-filtered queries (e.g., `rent_price <= 1500` AND `allowed_genders == 'Female Only'`).
-```bash
-python src/vector_store.py
-```
-
-#### Step 5: Run Distance Metrics Comparative Benchmark
-Computes and compares **Cosine Similarity**, **Euclidean ($L_2$) Distance**, and **Dot Product (Inner Product)** using NumPy/SciPy across 3 student test queries.
-```bash
-python src/distance_benchmark.py
-```
-
-#### Step 6: Execute RAG LLM Chat API Demonstration
-Connects retrieved context and system prompts to Google Gemini API (`gemini-2.5-flash` via `google-genai`). Evaluates housing search, landlord reservation hand-off, and out-of-scope refusal prompts.
-```bash
-python src/chat_api_demo.py
-```
-
----
-
-## 📄 Documentation Summary (`docs/`)
-
-- [`docs/checkpoint1_proposal.md`](docs/checkpoint1_proposal.md): Project Proposal, problem statement, target users, live data source, and success criteria.
-- [`docs/checkpoint1_reflection.md`](docs/checkpoint1_reflection.md): Data engineering reflection detailing HTML cleaning, dialect handling, utility booleans, and spatial Haversine distance calculations.
-- [`docs/checkpoint2_prompt_engineering.md`](docs/checkpoint2_prompt_engineering.md): Comprehensive specification of 3 production system prompts and anti-hallucination test results.
-- [`docs/checkpoint2_distance_metrics.md`](docs/checkpoint2_distance_metrics.md): Mathematical formulations and empirical comparison recommending Cosine Similarity for text chunk retrieval.
+- **Zero API Keys in Repository:** All secrets and credentials are read strictly from environment variables via `os.getenv("GEMINI_API_KEY")`.
+- **`.env.example` Included:** Provides variable names without sensitive values.
+- **Strict Grounding:** The model is prohibited from fabricating prices, contact numbers, or rules. When information is missing, it explicitly notes that the listing does not specify it.
+- **Public Accessibility:** Configured to run freely on public cloud infrastructure (Railway) with no user tracking or authentication barriers.
