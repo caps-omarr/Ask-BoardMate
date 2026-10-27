@@ -139,9 +139,19 @@ FOLLOWUP_KEYWORDS = [
     "rules", "how far", "distance", "walking", "available", "rooms", "bedspace"
 ]
 
+CLOSING_PHRASES = [
+    "salamat", "thank you", "thanks", "thx", "ty", "daghang salamat",
+    "wala na", "wala mna", "wala mn", "wala na bai", "wala na po", "wala na lods",
+    "ok na", "okay na", "ok na bai", "okay na bai", "ok na po", "okay na po",
+    "kana lang", "kana ra", "kana ra bai", "kana lang bai", "kana lang sa", "kana ra sa",
+    "bye", "goodbye", "cge bai", "sige bai", "sige po", "cge po", "sige salamat", "cge salamat"
+]
+
 def is_followup_query(query: str) -> bool:
     lowered = query.lower().strip()
     words = lowered.split()
+    if any(p in lowered for p in CLOSING_PHRASES):
+        return False
     if len(words) <= 5:
         return any(k in lowered for k in FOLLOWUP_KEYWORDS)
     return any(p in words for p in ["it", "its", "this", "that", "here", "there"])
@@ -160,10 +170,15 @@ def detect_intent(query: str) -> str:
     housing_keywords = [
         "house", "dorm", "room", "rent", "price", "curfew", "san isidro", "torres", "gm", 
         "bedspace", "female", "male", "budget", "near", "photo", "photos", "picture", 
-        "pictures", "pic", "pics", "image", "images", "look like", "view", "available"
+        "pictures", "pic", "pics", "image", "images", "look like", "view", "available",
+        "kwarto", "tagpila", "pila", "abang", "abangan", "asa", "location", "wifi"
     ]
     has_housing_intent = any(k in lowered for k in housing_keywords)
     
+    # Check for closing / gratitude
+    if any(p in lowered for p in CLOSING_PHRASES) and not has_housing_intent:
+        return "closing"
+
     if (lowered in GREETING_WORDS or (len(words) <= 2 and words.intersection(GREETING_WORDS))) and not has_housing_intent:
         return "greeting"
     elif any(w in lowered for w in ["reserve", "contact", "phone", "owner", "landlord", "book"]):
@@ -292,7 +307,7 @@ def chat_endpoint(payload: ChatRequest):
     intent = detect_intent(query)
     
     # 6. Context retrieval with state enrichment
-    if intent in ["greeting", "refusal"]:
+    if intent in ["greeting", "closing", "refusal"]:
         retrieved_ctx = ""
     else:
         detailed_chunks = retrieve_context(search_query, top_k=payload.top_k or 5)

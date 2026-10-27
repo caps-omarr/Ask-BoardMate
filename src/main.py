@@ -71,6 +71,11 @@ GUIDELINES FOR CONVERSATIONAL RAG:
 
 9. CLEAN PROFESSIONAL FORMATTING:
    - Do NOT use emojis, emoticons, or decorative icons in your responses. Keep responses clean, elegant, professional, and readable using standard markdown headings, bold text, and bullet lists.
+
+10. CLOSING, GRATITUDE & FAREWELLS:
+   - When the student says thank you, expresses satisfaction, says goodbye, or indicates they have no more questions (e.g. "salamat", "salamat kau bai", "ahh wala mna bai, salamat kau bai", "thank you", "thanks", "ok na po", "cge bai", "sige bai", "kana lang una", "bye"), reply warmly and naturally acknowledging their message.
+   - Match their language and vibe (e.g., in Bisaya: "Way sapayan bai! Walay problema gyud. Kung magkinahanglan ka'g tabang o naa kay laing pangutana bahin sa boarding houses duol sa TPC puhon, chat lang diri bisan kanus-a. Amping pirmi ug good luck sa imong pag-eskwela!").
+   - NEVER dump or list boarding houses when the user is saying thank you, goodbye, or has no further questions!
 """
 
 # System Prompts defined in Checkpoint 2
@@ -166,8 +171,14 @@ def call_gemini_api(prompt_text: str, intent: str = "search") -> str:
     api_key = os.getenv("GEMINI_API_KEY")
     
     if api_key and api_key != "your_gemini_api_key_here":
-        # Supported Gemini models list with fallback
-        candidate_models = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-latest"]
+        candidate_models = [
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-flash-lite-latest",
+            "gemini-3.6-flash",
+            "gemini-3.8-flash",
+            "gemini-flash-latest"
+        ]
         for model_name in candidate_models:
             try:
                 from google import genai
@@ -226,7 +237,14 @@ def call_gemini_conversational(query: str, retrieved_context: str = "", history:
     """Conversational RAG generation supporting multi-turn dialogue without unprompted listing dumps."""
     api_key = os.getenv("GEMINI_API_KEY")
     if api_key and api_key != "your_gemini_api_key_here":
-        candidate_models = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-latest"]
+        candidate_models = [
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-flash-lite-latest",
+            "gemini-3.6-flash",
+            "gemini-3.8-flash",
+            "gemini-flash-latest"
+        ]
         for model_name in candidate_models:
             try:
                 from google import genai
@@ -252,7 +270,7 @@ def call_gemini_conversational(query: str, retrieved_context: str = "", history:
 
                     contents_payload.extend(clean_history)
 
-                if retrieved_context and intent not in ["greeting", "refusal"]:
+                if retrieved_context and intent not in ["greeting", "closing", "refusal"]:
                     current_turn = f"RETRIEVED CONTEXT:\n{retrieved_context}\n\nSTUDENT INQUIRY:\n{query}"
                 else:
                     current_turn = query
@@ -272,18 +290,20 @@ def call_gemini_conversational(query: str, retrieved_context: str = "", history:
 
     # Clean fallbacks
     if intent == "greeting":
-        return ("Hello! I am E-BoardMate AI, your student housing assistant for Talibon Polytechnic College (TPC).\n\n"
+        return ("Hello! I am Ask BoardMate, your student housing assistant for Talibon Polytechnic College (TPC).\n\n"
                 "How can I help you with your boarding house search today? You can ask about available rooms, monthly rent, curfew hours, or female/male dorms near campus.")
+    elif intent == "closing":
+        return ("Way sapayan, bai! Walay problema gyud. Kung magkinahanglan ka usab og tabang sa pagpangita og boarding house sa Talibon, chat lang diri bisan kanus-a. Amping pirmi ug good luck sa imong pag-eskwela sa TPC!")
     elif intent == "refusal":
-        return ("I am E-BoardMate AI, specialized only in TPC student boarding house listings "
+        return ("I am Ask BoardMate, specialized only in TPC student boarding house listings "
                 "and housing policies in Talibon, Bohol. How can I assist you with your boarding house search?")
     elif intent == "reservation":
         return ("--------------------------------------------------\n"
-                "🏠 BOARDING HOUSE: Torres Boarding House\n"
-                "📍 ADDRESS: Purok-4 San Isidro, Talibon, Bohol\n"
-                "💰 MONTHLY RENT: ₱700 | UTILITIES: Water & Electricity included\n"
-                "👤 LANDLORD: Landlord Office (+63 917 000 1122)\n"
-                "🔗 LIVE LISTING: https://eboardmate.onrender.com/boarding-houses/torres-boarding-house\n"
+                "BOARDING HOUSE: Torres Boarding House\n"
+                "ADDRESS: Purok-4 San Isidro, Talibon, Bohol\n"
+                "MONTHLY RENT: ₱700 | UTILITIES: Water & Electricity included\n"
+                "LANDLORD: Landlord Office (+63 917 000 1122)\n"
+                "LIVE LISTING: https://eboardmate.onrender.com/boarding-houses/torres-boarding-house\n"
                 "--------------------------------------------------\n"
                 "To submit an online reservation, visit https://eboardmate.onrender.com/boarding-houses/torres-boarding-house.")
     else:
