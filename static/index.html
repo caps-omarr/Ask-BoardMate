@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
     <title>Ask-BoardMate — TPC Student Housing Assistant</title>
-    <link rel="icon" type="image/png" href="https://eboardmate.onrender.com/favicon.png">
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <link rel="apple-touch-icon" href="/static/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Plus+Jakarta+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +20,9 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <span class="brand-avatar">🏠</span>
+                    <div class="brand-logo-wrap">
+                        <img src="/static/logo.png" alt="E-BoardMate Logo" class="brand-logo-img">
+                    </div>
                     <div class="brand-info">
                         <span class="brand-title">Ask-BoardMate</span>
                         <span class="brand-subtitle">TPC Student Housing</span>
@@ -49,14 +52,24 @@
                 <ul class="nav-list">
                     <li>
                         <button class="nav-item active" id="currentChatNavItem">
-                            <span class="nav-icon">💬</span>
+                            <span class="nav-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </span>
                             <span class="nav-label">Current Chat</span>
                             <span class="nav-active-dot"></span>
                         </button>
                     </li>
                     <li>
                         <a href="https://eboardmate.onrender.com/" target="_blank" rel="noopener noreferrer" class="nav-item nav-link-external">
-                            <span class="nav-icon">🌐</span>
+                            <span class="nav-icon">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                </svg>
+                            </span>
                             <span class="nav-label">E-BoardMate Portal</span>
                             <svg class="external-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -108,7 +121,7 @@
                     </svg>
                 </button>
                 <div class="top-nav-brand">
-                    <span class="top-brand-avatar">🏠</span>
+                    <img src="/static/logo.png" alt="E-BoardMate" class="top-brand-logo-img">
                     <span class="top-brand-title">Ask-BoardMate</span>
                 </div>
                 <div class="top-nav-spacer"></div>

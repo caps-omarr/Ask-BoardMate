@@ -68,7 +68,7 @@ function generateCarouselHtml(slides) {
         return `
             <div class="chat-photo-card" onclick="openPhotoModal('${s.url}', '${escapeAttr(s.alt)}')">
                 <img src="${s.url}" alt="${escapeAttr(s.alt)}" loading="lazy" class="photo-card-img" />
-                <div class="photo-card-badge">📷 1 Photo</div>
+                <div class="photo-card-badge">1 Photo</div>
             </div>
         `;
     }
@@ -95,7 +95,7 @@ function generateCarouselHtml(slides) {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
             <div class="carousel-counter">
-                📷 <span class="carousel-current">1</span> / <span>${slides.length}</span>
+                <span class="carousel-current">1</span> / <span>${slides.length} Photos</span>
             </div>
             <div class="carousel-dots">
                 ${dotsHtml}
@@ -341,7 +341,7 @@ function appendMessage(text, isUser = false, save = true) {
         const authorHeader = document.createElement('div');
         authorHeader.className = 'bot-author-header';
         authorHeader.innerHTML = `
-            <span class="bot-avatar-badge">🏠</span>
+            <img src="/static/logo.png" alt="" class="bot-badge-logo">
             <span class="bot-author-name">Ask-BoardMate</span>
         `;
         msgDiv.appendChild(authorHeader);
@@ -377,7 +377,7 @@ function showTypingIndicator() {
     const authorHeader = document.createElement('div');
     authorHeader.className = 'bot-author-header';
     authorHeader.innerHTML = `
-        <span class="bot-avatar-badge">🏠</span>
+        <img src="/static/logo.png" alt="" class="bot-badge-logo">
         <span class="bot-author-name">Ask-BoardMate</span>
     `;
     indicatorDiv.appendChild(authorHeader);
@@ -431,26 +431,24 @@ try {
 function renderWelcomeHero() {
     chatMessages.innerHTML = `
         <div class="welcome-hero" id="welcomeHero">
-            <div class="hero-glyph">🏠</div>
+            <div class="hero-logo-wrap">
+                <img src="/static/logo.png" alt="E-BoardMate" class="hero-logo-img">
+            </div>
             <div class="hero-pill">TPC Student Housing Assistant</div>
             <h2 class="hero-title">How can I help you find housing today?</h2>
             <p class="hero-subtitle">Ask about accredited boarding houses in Talibon, Bohol, compare rental rates, check curfews, or view property photos.</p>
             
             <div class="suggestion-grid">
                 <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('Show me photos of Torres Boarding House')">
-                    <span class="chip-icon">📷</span>
                     <span>Photos of Torres Boarding House</span>
                 </button>
                 <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('What boarding houses are under ₱1,000 per month?')">
-                    <span class="chip-icon">💰</span>
                     <span>Dorms under ₱1,000/month</span>
                 </button>
                 <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('Which boarding houses allow female students only?')">
-                    <span class="chip-icon">👩</span>
                     <span>Female-only dorms near TPC</span>
                 </button>
                 <button type="button" class="suggestion-chip" onclick="sendSuggestedPrompt('How many total boarding houses are in Talibon?')">
-                    <span class="chip-icon">📍</span>
                     <span>Explore all 15 accredited houses</span>
                 </button>
             </div>

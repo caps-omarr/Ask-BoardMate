@@ -63,6 +63,9 @@ GUIDELINES FOR CONVERSATIONAL RAG:
        :::
      * ONLY use real URLs listed under "Available Listing Photos:" in the RETRIEVED CONTEXT. NEVER invent or hallucinate image URLs.
      * If a listing has no photos available, state: "Photos for this boarding house have not been uploaded by the landlord yet."
+
+8. CLEAN PROFESSIONAL FORMATTING:
+   - Do NOT use emojis, emoticons, or decorative icons in your responses. Keep responses clean, elegant, professional, and readable using standard markdown headings, bold text, and bullet lists.
 """
 
 # System Prompts defined in Checkpoint 2
@@ -104,14 +107,14 @@ SYSTEM_PROMPT_RESERVATION = """You are E-BoardMate AI. When a student expresses 
 
 RESERVATION HAND-OFF FORMAT:
 --------------------------------------------------
-🏠 BOARDING HOUSE: [Name]
-📍 ADDRESS: [Address] ([Walking Mins] mins walk to TPC)
-💰 MONTHLY RENT: [Price] | UTILITIES: [Water/Elec Summary]
-👤 LANDLORD / OWNER: [Owner Name]
-📞 DIRECT PHONE: [Owner Phone]
-🔑 VACANCY STATUS: [Available Rooms/Bedspaces]
-📋 KEY HOUSE RULES: [Curfew & Rules]
-🔗 LIVE LISTING: https://eboardmate.onrender.com/boarding-houses/[slug]
+BOARDING HOUSE: [Name]
+ADDRESS: [Address] ([Walking Mins] mins walk to TPC)
+MONTHLY RENT: [Price] | UTILITIES: [Water/Elec Summary]
+LANDLORD / OWNER: [Owner Name]
+DIRECT PHONE: [Owner Phone]
+VACANCY STATUS: [Available Rooms/Bedspaces]
+KEY HOUSE RULES: [Curfew & Rules]
+LIVE LISTING: https://eboardmate.onrender.com/boarding-houses/[slug]
 --------------------------------------------------
 NEXT STEPS FOR STUDENT:
 1. Call or text the landlord directly at [Owner Phone].

@@ -17,67 +17,67 @@
 :root,
 [data-theme="light"],
 [data-bs-theme="light"] {
-    /* eBoardMate Portal Signature Gradient & Palette */
-    --eboardmate-gradient: radial-gradient(circle at top right, rgba(46, 125, 91, 0.12), transparent 32rem),
-                           linear-gradient(180deg, #ffffff 0%, #F8FAF9 100%);
-    --bg-page: #F8FAF9;
-    --bg-sidebar: #F4F7F5;
-    --bg-sidebar-hover: #E8EFEA;
-    --bg-surface: #FFFFFF;
-    --bg-input: #FFFFFF;
-    --bg-user-bubble: #E8F0EA;
+    /* Smooth Natural Alabaster & Sage Palette (No stark plain white) */
+    --eboardmate-gradient: radial-gradient(circle at 88% 12%, rgba(39, 109, 84, 0.07), transparent 32rem),
+                           linear-gradient(180deg, #F8F7F4 0%, #EDEBE5 100%);
+    --bg-page: #F8F7F4;
+    --bg-sidebar: #EFECE6;
+    --bg-sidebar-hover: #E4E0D7;
+    --bg-surface: #FCFBF9;
+    --bg-input: #FCFBF9;
+    --bg-user-bubble: #E3EDE6;
     --bg-bot-surface: transparent;
-    --bg-chip: #FFFFFF;
-    --bg-chip-hover: #F0F6F2;
-    --bg-button-subtle: #EDF3EE;
-    --bg-button-hover: #E2ECE5;
+    --bg-chip: #FCFBF9;
+    --bg-chip-hover: #EDEAE2;
+    --bg-button-subtle: #E8E5DD;
+    --bg-button-hover: #DDD9CF;
 
-    --text-main: #1C2320;
-    --text-secondary: #576560;
-    --text-muted: #83918B;
-    --text-user: #0D261B;
+    --text-main: #202422;
+    --text-secondary: #58635E;
+    --text-muted: #828E89;
+    --text-user: #153325;
 
-    --brand-primary: #2e7d5b;
-    --brand-primary-hover: #24664a;
+    --brand-primary: #276d54;
+    --brand-primary-hover: #1f5743;
     --brand-emerald-dark: #022c22;
     --brand-emerald-light: #065f46;
     --brand-highlight: linear-gradient(135deg, #022c22, #065f46);
 
-    --primary: #2e7d5b;
-    --primary-hover: #24664a;
-    --primary-soft: rgba(46, 125, 91, 0.12);
+    --primary: #276d54;
+    --primary-hover: #1f5743;
+    --primary-soft: rgba(39, 109, 84, 0.10);
     
-    --border-color: rgba(46, 125, 91, 0.14);
-    --border-subtle: rgba(46, 125, 91, 0.08);
-    --border-hover: rgba(46, 125, 91, 0.3);
+    --border-color: rgba(39, 109, 84, 0.14);
+    --border-subtle: rgba(44, 52, 48, 0.07);
+    --border-hover: rgba(39, 109, 84, 0.32);
     
-    --shadow-floating: 0 10px 30px -4px rgba(2, 44, 34, 0.08), 0 2px 8px -1px rgba(2, 44, 34, 0.04);
-    --shadow-chip: 0 1px 4px rgba(2, 44, 34, 0.05);
-    --shadow-sidebar: 4px 0 24px rgba(2, 44, 34, 0.04);
-    --scrollbar-thumb: #CAD7CF;
-    --input-mask: linear-gradient(to top, #F8FAF9 72%, rgba(248, 250, 249, 0));
+    --shadow-floating: 0 10px 30px -4px rgba(28, 44, 36, 0.08), 0 2px 6px -1px rgba(28, 44, 36, 0.04);
+    --shadow-chip: 0 1px 3px rgba(28, 44, 36, 0.05);
+    --shadow-sidebar: 4px 0 24px rgba(28, 44, 36, 0.04);
+    --scrollbar-thumb: #C8D1CC;
+    --input-mask: linear-gradient(to top, #EDEBE5 72%, rgba(237, 235, 229, 0));
 }
 
 [data-theme="dark"],
 [data-bs-theme="dark"] {
-    /* eBoardMate Portal Signature Gradient in Dark Mode */
-    --eboardmate-gradient: radial-gradient(circle at top right, rgba(46, 125, 91, 0.16), transparent 32rem),
-                           linear-gradient(180deg, #121212 0%, #1a1e1c 100%);
-    --bg-page: #121212;
-    --bg-sidebar: #151817;
-    --bg-sidebar-hover: #1E2320;
-    --bg-surface: #1C201E;
-    --bg-input: #1C201E;
-    --bg-user-bubble: #1E2B24;
+    /* Smooth Obsidian & Deep Sage Dark Mode */
+    --eboardmate-gradient: radial-gradient(circle at top right, rgba(46, 125, 91, 0.14), transparent 32rem),
+                           linear-gradient(180deg, #131615 0%, #181C1A 100%);
+    --bg-page: #131615;
+    --bg-sidebar: #161A18;
+    --bg-sidebar-hover: #1E2421;
+    --bg-surface: #1C221F;
+    --bg-input: #1C221F;
+    --bg-user-bubble: #1F3026;
     --bg-bot-surface: transparent;
-    --bg-chip: #1C201E;
-    --bg-chip-hover: #252D28;
-    --bg-button-subtle: #1E2320;
-    --bg-button-hover: #262D29;
+    --bg-chip: #1C221F;
+    --bg-chip-hover: #26302B;
+    --bg-button-subtle: #1F2522;
+    --bg-button-hover: #2A332E;
 
-    --text-main: #EDEDED;
-    --text-secondary: #9FAAA4;
-    --text-muted: #727C77;
+    --text-main: #ECEFEA;
+    --text-secondary: #9EA8A2;
+    --text-muted: #727C76;
     --text-user: #F0FAF4;
 
     --brand-primary: #34D399;
@@ -90,15 +90,15 @@
     --primary-hover: #6EE7B7;
     --primary-soft: rgba(52, 211, 153, 0.15);
 
-    --border-color: rgba(255, 255, 255, 0.09);
-    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.04);
     --border-hover: rgba(52, 211, 153, 0.35);
 
     --shadow-floating: 0 12px 35px -4px rgba(0, 0, 0, 0.6), 0 2px 8px -1px rgba(0, 0, 0, 0.4);
     --shadow-chip: 0 1px 4px rgba(0, 0, 0, 0.3);
     --shadow-sidebar: 4px 0 30px rgba(0, 0, 0, 0.5);
     --scrollbar-thumb: #2B332F;
-    --input-mask: linear-gradient(to top, #121212 72%, rgba(18, 18, 18, 0));
+    --input-mask: linear-gradient(to top, #181C1A 72%, rgba(24, 28, 26, 0));
 }
 
 html, body {
@@ -179,18 +179,33 @@ body {
     gap: 10px;
 }
 
-.brand-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
+.brand-logo-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: 34px;
+    padding: 3px 6px;
+    border-radius: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     flex-shrink: 0;
+}
+
+.brand-logo-img {
+    height: 24px;
+    width: auto;
+    max-width: 110px;
+    object-fit: contain;
+    display: block;
+}
+
+.top-brand-logo-img {
+    height: 24px;
+    width: auto;
+    max-width: 105px;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-info {
@@ -547,18 +562,24 @@ body {
     animation: fadeIn 0.4s ease-out;
 }
 
-.hero-glyph {
-    width: 52px;
-    height: 52px;
+.hero-logo-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
     border-radius: 16px;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 14px rgba(44, 39, 36, 0.05);
+    box-shadow: var(--shadow-chip);
+}
+
+.hero-logo-img {
+    height: 40px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    display: block;
 }
 
 .hero-pill {
@@ -682,28 +703,25 @@ body {
 .bot-author-header {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     margin-bottom: 8px;
     user-select: none;
 }
 
-.bot-avatar-badge {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    background: var(--bg-button-subtle);
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
+.bot-badge-logo {
+    height: 18px;
+    width: auto;
+    max-width: 48px;
+    object-fit: contain;
+    border-radius: 3px;
+    display: inline-block;
 }
 
 .bot-author-name {
     font-family: 'Newsreader', Georgia, serif;
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--text-main);
+    color: var(--brand-primary);
     letter-spacing: -0.01em;
 }
 
@@ -866,14 +884,15 @@ body {
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: var(--text-main);
-    color: var(--bg-page);
+    background: var(--brand-primary);
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.18s ease;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(39, 109, 84, 0.25);
 }
 
 .input-form button #stopIcon {
@@ -885,7 +904,7 @@ body {
 }
 
 .input-form button:hover {
-    background: var(--primary);
+    background: var(--brand-primary-hover);
     transform: scale(1.04);
 }
 
