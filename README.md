@@ -28,14 +28,12 @@ Finding accredited, safe, and affordable student boarding houses near **Talibon 
 
 ---
 
-## 🌐 2. Live Deployed Application & Video Demonstration
+## 🌐 2. Live Deployed Application 
 
 | Item | Details / Links |
 | :--- | :--- |
 | **Live Deployed App URL** | [https://eboardrag-production.up.railway.app](https://eboardrag-production.up.railway.app) *(or live Railway deployment URL)* |
 | **Production Web Portal** | [https://eboardmate.onrender.com](https://eboardmate.onrender.com) |
-| **Demo Video Link** | *Add your YouTube (Unlisted) or Google Drive link here (e.g., `https://youtu.be/...`)* |
-| **Demo Video Script** | [`Ask_BoardMate_Demo_Video_Script.docx`](Ask_BoardMate_Demo_Video_Script.docx) *(Complete 5-8 min recording script provided in repo)* |
 | **Public GitHub Repo** | [https://github.com/caps-omarr/Ask-BoardMate](https://github.com/caps-omarr/Ask-BoardMate) |
 | **Access Requirements** | **No login, no authentication, and no installation required** — open directly in any desktop or mobile browser. |
 
@@ -191,36 +189,8 @@ The table below details benchmark queries demonstrating full RAG functionality, 
 
 ---
 
-## 📽️ 8. Demo Video Structure (5 to 8 Minutes)
 
-A complete spoken script with exact action cues is available in [`Ask_BoardMate_Demo_Video_Script.docx`](Ask_BoardMate_Demo_Video_Script.docx). The video covers:
-
-1. **0:00 – 1:15 | The Problem & Knowledge Source:**
-   - Housing pain points for Talibon Polytechnic College (TPC) students.
-   - Ground truth data source: 15 verified accredited boarding houses from `eboardmate.onrender.com`.
-2. **1:15 – 2:30 | Architecture & Tech Stack:**
-   - Preprocessing with Haversine walking distances.
-   - `sentence-transformers/all-MiniLM-L6-v2` dense 384-d embeddings.
-   - ChromaDB + NumPy vector similarity matrix.
-   - Google Gemini API (`gemini-3.5-flash-lite`, `google-genai`).
-   - FastAPI + Claude-aesthetic web UI on Railway.
-3. **2:30 – 3:30 | Live Walkthrough of Deployed App:**
-   - Clean interface, sidebar session history, theme toggle (Dark/Light), prompt chips.
-   - Zero login/installation requirement.
-4. **3:30 – 6:00 | Live Testing 3+ Sample Questions:**
-   - Question 1: Specific housing search with budget & gender constraints.
-   - Question 2: Conversational follow-up resolving pronouns ("its curfew") + reservation hand-off.
-   - Bonus: Conversational Bisaya closing ("salamat kau bai").
-   - Question 3: Out-of-scope question documents cannot answer (homework refusal & unlisted property).
-5. **6:00 – 7:00 | Future Improvements & Conclusion:**
-   - Interactive GPS map visualization with walking routes.
-   - Direct SMS/messaging gateway for landlord inquiries.
-   - Verified student reviews and peer rating ingestion.
-   - Hybrid dense semantic + sparse BM25 retrieval.
-
----
-
-## 📁 9. Repository Directory Layout
+## 📁 8. Repository Directory Layout
 
 ```text
 eboardrag/
@@ -258,7 +228,7 @@ eboardrag/
 
 ---
 
-## 🔒 10. Security & Responsible AI Practices
+## 🔒 9. Security & Responsible AI Practices
 
 - **Zero API Keys in Repository:** All secrets and credentials are read strictly from environment variables via `os.getenv("GEMINI_API_KEY")`.
 - **`.env.example` Included:** Provides variable names without sensitive values.
